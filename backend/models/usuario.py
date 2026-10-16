@@ -9,6 +9,7 @@ class Usuario(ABC):
         self.__correo = correo
         self.__contrasena = contrasena
 
+
     @abstractmethod
     def iniciar_sesion(self):
         pass
