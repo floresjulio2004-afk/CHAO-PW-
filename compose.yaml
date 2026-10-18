@@ -1,0 +1,6 @@
+services:
+  chao:
+    build: .
+    container_name: chao-app
+    ports:
+      - "80:80"
