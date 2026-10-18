@@ -50,15 +50,5 @@ class Usuario(ABC):
 
 
     @abstractmethod
-    def iniciar_sesion(self):
-        pass
-
-
-    @abstractmethod
     def editar_perfil(self):
-        pass
-
-
-    @abstractmethod
-    def cerrar_sesion(self):
         pass
