@@ -1,7 +1,7 @@
 USE CHAO;
 GO 
 
-CREATE TABLE dbo.aula(
+CREATE TABLE dbo.Aula(
     id_aula INT PRIMARY KEY, 
     nombre NVARCHAR(150) NOT NULL, 
     capacidad INT NOT NULL,
