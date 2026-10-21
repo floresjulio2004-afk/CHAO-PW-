@@ -64,7 +64,7 @@ class Aula:
     def eliminar(self):
         print("Aula eliminada")
 
-aula1 = Aula("131", "Laboratorio de Informática", 35, "Laboratorio")
+aula1 = Aula("131", "Base de datos", 35, "Laboratorio")
 
 print(aula1.id_aula)
 print(aula1.nombre)
