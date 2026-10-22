@@ -3,7 +3,9 @@ from usuario import Usuario
 
 class Docente(Usuario):
     def __init__(self, id_usuario, nombre, cedula, correo, contrasena, especialidad):
-        super().__init__(id_usuario, nombre, cedula, cooreo, contrasena0)
+        super().__init__(id_usuario, nombre, cedula, correo, contrasena)
+        if not isinstance(especialidad, str) or not especialidad.strip():
+            raise ValueError("La especialidad de un docente no puede quedar vacía")
         self.__especialidad = especialidad
 
 
@@ -13,7 +15,7 @@ class Docente(Usuario):
 
 
     def editar_perfil(self):
-        pass
+        return True
 
 
     def consultar_horario(self):
