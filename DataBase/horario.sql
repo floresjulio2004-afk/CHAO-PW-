@@ -3,6 +3,6 @@ GO
 
 CREATE TABLE dbo.Horario(
     id_horario INT PRIMARY KEY, 
-    estado NVARCHAR(20),
-    observacion NVARCHAR(200)
+    estado NVARCHAR(20) NOT NULL,
+    observacion NVARCHAR(200) NULL
 );
