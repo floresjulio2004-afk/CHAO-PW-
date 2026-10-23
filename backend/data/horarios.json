@@ -1,0 +1,10 @@
+{
+    "1310000011": [
+        {"id": 1, "dia": "Lunes", "hora_inicio": "07:00", "hora_fin": "09:00", "asignatura": "Programación Orientada a Objetos", "docente": "Albert Moreira", "salon": "Laboratorio de Software", "codigo_aula": "102"},
+        {"id": 2, "dia": "Lunes", "hora_inicio": "09:00", "hora_fin": "11:00", "asignatura": "Redes de Computadoras", "docente": "Carlos Zambrano", "salon": "Aula de Clases", "codigo_aula": "205"},
+        {"id": 3, "dia": "Martes", "hora_inicio": "07:00", "hora_fin": "09:00", "asignatura": "Bases de Datos", "docente": "Pedro Intriago", "salon": "Laboratorio de Cómputo", "codigo_aula": "103"},
+        {"id": 4, "dia": "Miércoles", "hora_inicio": "09:00", "hora_fin": "11:00", "asignatura": "Modelado Orientado a Objetos", "docente": "Robert Cedeño", "salon": "Aula de Diseño", "codigo_aula": "301"},
+        {"id": 5, "dia": "Jueves", "hora_inicio": "07:00", "hora_fin": "09:00", "asignatura": "Programación Orientada a Objetos", "docente": "Albert Moreira", "salon": "Laboratorio de Software", "codigo_aula": "102"},
+        {"id": 6, "dia": "Viernes", "hora_inicio": "09:00", "hora_fin": "11:00", "asignatura": "Bases de Datos", "docente": "Pedro Intriago", "salon": "Laboratorio de Cómputo", "codigo_aula": "103"}
+    ]
+}
