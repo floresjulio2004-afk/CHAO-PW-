@@ -1,0 +1,30 @@
+[
+    {
+        "nombre": "Julio Flores",
+        "cedula": "1310000011",
+        "correo": "e1310000011@live.uleam.edu.ec",
+        "rol": "estudiante",
+        "contrasena_hash": "scrypt:32768:8:1$liG1u5ORWJ0TEXJI$7d3329ba97ee8cc1c6252f09c456e49a6a186d8ebb13efce765648afba095ad1246d089a942a8a504f79c23c35b0d60f32eb0ebff807b2277f6a526bd2e9dae8"
+    },
+    {
+        "nombre": "Albert Moreira",
+        "cedula": "1310000234",
+        "correo": "p1310000234@live.uleam.edu.ec",
+        "rol": "docente",
+        "contrasena_hash": "scrypt:32768:8:1$liG1u5ORWJ0TEXJI$7d3329ba97ee8cc1c6252f09c456e49a6a186d8ebb13efce765648afba095ad1246d089a942a8a504f79c23c35b0d60f32eb0ebff807b2277f6a526bd2e9dae8"
+    },
+    {
+        "nombre": "Luis Anchundia",
+        "cedula": "1310003422",
+        "correo": "g1310003422@live.uleam.edu.ec",
+        "rol": "gestor",
+        "contrasena_hash": "scrypt:32768:8:1$liG1u5ORWJ0TEXJI$7d3329ba97ee8cc1c6252f09c456e49a6a186d8ebb13efce765648afba095ad1246d089a942a8a504f79c23c35b0d60f32eb0ebff807b2277f6a526bd2e9dae8"
+    },
+    {
+        "nombre": "Oscar Mero",
+        "cedula": "1310005544",
+        "correo": "a1310005544@live.uleam.edu.ec",
+        "rol": "administrador",
+        "contrasena_hash": "scrypt:32768:8:1$liG1u5ORWJ0TEXJI$7d3329ba97ee8cc1c6252f09c456e49a6a186d8ebb13efce765648afba095ad1246d089a942a8a504f79c23c35b0d60f32eb0ebff807b2277f6a526bd2e9dae8"
+    }
+]
