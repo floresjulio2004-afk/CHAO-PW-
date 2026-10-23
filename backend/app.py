@@ -2,7 +2,7 @@ import json
 import os
 from functools import wraps
 
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, abort
 from services.gestor_contrasenas import GestorContrasenas
 
 app = Flask(
@@ -13,6 +13,9 @@ app = Flask(
 app.secret_key = os.getenv("SECRET_KEY", "clave-de-desarrollo")
 
 RUTA_USUARIOS = os.path.join(os.path.dirname(__file__), "data", "usuarios.json")
+RUTA_HORARIOS = os.path.join(os.path.dirname(__file__), "data", "horarios.json")
+
+DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
 
 
 def buscar_usuario(correo):
@@ -22,6 +25,12 @@ def buscar_usuario(correo):
         if usuario["correo"].lower() == correo.lower():
             return usuario
     return None
+
+
+def clases_de(cedula):
+    with open(RUTA_HORARIOS, encoding="utf-8") as archivo:
+        horarios = json.load(archivo)
+    return horarios.get(cedula, [])
 
 
 def rol_requerido(rol):
@@ -52,6 +61,7 @@ def login():
 
         if usuario and GestorContrasenas.verificar_contrasena(contrasena, usuario["contrasena_hash"]):
             session["nombre"] = usuario["nombre"]
+            session["cedula"] = usuario["cedula"]
             session["rol"] = usuario["rol"]
             return redirect(url_for("perfil"))
 
@@ -76,6 +86,25 @@ def perfil():
 @rol_requerido("estudiante")
 def estudiante():
     return render_template("perfil_estudiante.html", nombre=session["nombre"])
+
+
+@app.route("/estudiante/horario")
+@rol_requerido("estudiante")
+def estudiante_horario():
+    clases = clases_de(session["cedula"])
+    franjas = sorted({(c["hora_inicio"], c["hora_fin"]) for c in clases})
+    grilla = {(c["dia"], c["hora_inicio"]): c for c in clases}
+    return render_template("horario.html", nombre=session["nombre"],
+                           dias=DIAS, franjas=franjas, grilla=grilla)
+
+
+@app.route("/estudiante/clase/<int:id_clase>")
+@rol_requerido("estudiante")
+def estudiante_clase(id_clase):
+    for clase in clases_de(session["cedula"]):
+        if clase["id"] == id_clase:
+            return render_template("clase.html", clase=clase)
+    abort(404)
 
 
 @app.route("/docente")
