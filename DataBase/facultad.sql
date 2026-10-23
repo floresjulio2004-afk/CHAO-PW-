@@ -2,7 +2,7 @@ USE CHAO;
 GO
 
 CREATE TABLE dbo.Facultad(
-    id_facultad integer primary key,
-    nombre NVARCHAR (120),
+    id_facultad INT PRIMARY KEY,
+    nombre NVARCHAR(120) NOT NULL
 );
-
+GO
