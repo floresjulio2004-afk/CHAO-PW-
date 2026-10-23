@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Perfil de administrador | C.H.A.O.{% endblock %}
+
+{% block contenido %}
+<section>
+    <h2>Perfil de administrador</h2>
+    <p>Bienvenido, <strong>{{ nombre }}</strong></p>
+    <a class="salir" href="{{ url_for('logout') }}">Cerrar sesión</a>
+</section>
+
+<section>
+    <article><h3>Usuarios</h3><p>Administración de cuentas del sistema.</p></article>
+    <article><h3>Configuración</h3><p>Periodos académicos y ajustes generales.</p></article>
+</section>
+{% endblock %}

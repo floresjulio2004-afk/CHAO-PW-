@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Perfil de gestor | C.H.A.O.{% endblock %}
+
+{% block contenido %}
+<section>
+    <h2>Perfil de gestor</h2>
+    <p>Bienvenido, <strong>{{ nombre }}</strong></p>
+    <a class="salir" href="{{ url_for('logout') }}">Cerrar sesión</a>
+</section>
+
+<section>
+    <article><h3>Gestión de horarios</h3><p>Organización de horarios académicos.</p></article>
+    <article><h3>Aulas y asignaturas</h3><p>Administración de aulas, asignaturas y paralelos.</p></article>
+</section>
+{% endblock %}

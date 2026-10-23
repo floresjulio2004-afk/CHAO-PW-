@@ -1,63 +1,48 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi horario | C.H.A.O.</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/horario.css') }}">
-</head>
-<body>
-    <header>
-        <h1>C.H.A.O.</h1>
-        <p>Sistema de Control de Horarios Académicos Organizados</p>
-    </header>
+{% extends "base.html" %}
+{% block titulo %}Mi horario estudiantil | C.H.A.O.{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/horarios.css') }}">
+{% endblock %}
 
-    <main>
-        <a class="volver" href="{{ url_for('inicio') }}">← Volver al inicio</a>
+{% block contenido %}
+<a class="volver" href="{{ url_for('estudiante') }}">← Volver al perfil</a>
 
-        <section>
-            <h2>Mi horario</h2>
-            <p>Estudiante: <strong>{{ estudiante['nombre'] }}</strong></p>
+<section>
+    <h2>Mi horario estudiantil</h2>
+    <p>Estudiante: <strong>{{ nombre }}</strong></p>
+    <p>Toca una clase para ver su información.</p>
 
-            {% if franjas %}
-            <div class="tabla-scroll">
-                <table class="horario">
-                    <thead>
-                        <tr>
-                            <th>Hora</th>
-                            {% for n, nombre in dias.items() %}<th>{{ nombre }}</th>{% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ini, fin in franjas %}
-                        <tr>
-                            <th>{{ ini }} - {{ fin }}</th>
-                            {% for n in dias %}
-                            {% set c = grilla.get((n, ini, fin)) %}
-                            <td>
-                                {% if c %}
-                                <div class="clase color-{{ c['asignatura_id'] % 5 }}">
-                                    <strong>{{ c['nombre'] }}</strong>
-                                    <span>{{ c['aula'] }}</span>
-                                    <span>{{ c['docente'] }}</span>
-                                </div>
-                                {% endif %}
-                            </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <article><p>Aún no tienes clases asignadas.</p></article>
-            {% endif %}
-        </section>
-    </main>
-
-    <footer>
-        <p>C.H.A.O. — Sistema en desarrollo</p>
-    </footer>
-</body>
-</html>
+    {% if franjas %}
+    <div class="tabla-scroll">
+        <table class="horario">
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    {% for dia in dias %}<th>{{ dia }}</th>{% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for inicio, fin in franjas %}
+                <tr>
+                    <th>{{ inicio }} - {{ fin }}</th>
+                    {% for dia in dias %}
+                    {% set c = grilla.get((dia, inicio)) %}
+                    <td>
+                        {% if c %}
+                        <a class="clase color-{{ c['id'] % 5 }}" href="{{ url_for('estudiante_clase', id_clase=c['id']) }}">
+                            <strong>{{ c['asignatura'] }}</strong>
+                            <span>Aula {{ c['codigo_aula'] }}</span>
+                        </a>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <article><p>Aún no tienes clases asignadas.</p></article>
+    {% endif %}
+</section>
+{% endblock %}

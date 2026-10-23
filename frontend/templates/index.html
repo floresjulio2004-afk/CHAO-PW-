@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}C.H.A.O. | Gestión de Horarios{% endblock %}
+
+{% block contenido %}
+<section>
+    <h2>Bienvenido a C.H.A.O.</h2>
+    <p>
+        Una plataforma para organizar y gestionar los horarios académicos universitarios.
+        Lo que es un CHAOS en inglés, te lo convertimos en un chao :)
+    </p>
+    <a class="entrar" href="{{ url_for('login') }}">Iniciar sesión</a>
+</section>
+{% endblock %}

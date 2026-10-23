@@ -1,8 +1,8 @@
-/* Vista de horario del estudiante */
+/* Horario del estudiante */
 .volver {
     display: inline-block;
     margin-bottom: 15px;
-    color: #245b91;
+    color: white;
     text-decoration: none;
 }
 
@@ -15,9 +15,7 @@ table.horario {
     min-width: 700px;
     border-collapse: collapse;
     background-color: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    color: #243047;
 }
 
 .horario th,
@@ -29,7 +27,7 @@ table.horario {
 }
 
 .horario thead th {
-    background-color: #173b67;
+    background-color: #1d8049;
     color: white;
 }
 
@@ -39,10 +37,17 @@ table.horario {
 }
 
 .clase {
+    display: block;
     border-radius: 8px;
     padding: 8px;
     text-align: left;
     font-size: 14px;
+    color: #243047;
+    text-decoration: none;
+}
+
+.clase:hover {
+    outline: 2px solid #1d8049;
 }
 
 .clase span {
@@ -55,3 +60,20 @@ table.horario {
 .color-2 { background-color: #fef3c7; }
 .color-3 { background-color: #fce7f3; }
 .color-4 { background-color: #ede9fe; }
+
+/* Información de la clase */
+.detalle {
+    background-color: white;
+    color: #243047;
+}
+
+.detalle p {
+    margin: 0 0 10px 0;
+}
+
+.detalle span {
+    display: block;
+    font-size: 13px;
+    color: #1d8049;
+    font-weight: bold;
+}

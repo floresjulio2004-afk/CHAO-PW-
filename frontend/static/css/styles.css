@@ -5,12 +5,11 @@
 body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #ca5252;
-    color: #966161;
+    background-color: #ffffff;
+    color: #61967b;
     line-height: 1.6;
 }
 
-/* Encabezado */
 header {
     background-color: #1d8049;
     color: white;
@@ -46,7 +45,7 @@ section > h2 {
 
 /* Módulos */
 article {
-    background-color: rgb(202, 99, 99);
+    background-color: rgb(155, 229, 178);
     border: 1px solid #e0e5ec;
     border-radius: 10px;
     padding: 22px;
@@ -56,7 +55,7 @@ article {
 
 article h3 {
     margin-top: 0;
-    color: #245b91;
+    color: #1c2f42;
 }
 
 article p {
@@ -124,4 +123,27 @@ footer {
     color: white;
     border-radius: 6px;
     text-decoration: none;
+}
+
+.opcion {
+    display: block;
+    background-color: white;
+    border: 1px solid #e0e5ec;
+    border-radius: 10px;
+    padding: 22px;
+    text-decoration: none;
+    color: #243047;
+}
+
+.opcion:hover {
+    border-color: #1d8049;
+}
+
+.opcion h3 {
+    margin: 0 0 5px 0;
+    color: #1d8049;
+}
+
+.opcion p {
+    margin: 0;
 }

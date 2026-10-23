@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}{{ clase['asignatura'] }} | C.H.A.O.{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/horarios.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<a class="volver" href="{{ url_for('estudiante_horario') }}">← Volver al horario</a>
+
+<section>
+    <h2>Información de la clase</h2>
+
+    <article class="detalle">
+        <p><span>Asignatura</span> {{ clase['asignatura'] }}</p>
+        <p><span>Docente</span> {{ clase['docente'] }}</p>
+        <p><span>Salón</span> {{ clase['salon'] }}</p>
+        <p><span>Código de aula</span> {{ clase['codigo_aula'] }}</p>
+        <p><span>Horario</span> {{ clase['dia'] }}, {{ clase['hora_inicio'] }} - {{ clase['hora_fin'] }}</p>
+    </article>
+</section>
+{% endblock %}
