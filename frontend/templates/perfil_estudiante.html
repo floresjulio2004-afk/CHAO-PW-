@@ -9,7 +9,9 @@
 </section>
 
 <section>
-    <article><h3>Mi horario</h3><p>Consulta de tu horario de clases.</p></article>
-    <article><h3>Mis asignaturas</h3><p>Asignaturas y docentes del periodo.</p></article>
+    <a class="opcion" href="{{ url_for('estudiante_horario') }}">
+        <h3>Mi horario estudiantil</h3>
+        <p>Visualiza tu horario y consulta la información de tus clases.</p>
+    </a>
 </section>
 {% endblock %}
