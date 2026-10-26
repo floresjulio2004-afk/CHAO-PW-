@@ -2,12 +2,12 @@ from abc import ABC, abstractmethod
 
 
 class Usuario(ABC):
-    def __init__(self, id_usuario, nombre, cedula, correo, contrasena):
+    def __init__(self, id_usuario, nombre, cedula, correo, contrasena_hash):
         self.__id_usuario = id_usuario
-        self.__nombre = nombre
+        self.nombre = nombre
         self.__cedula = cedula
-        self.__correo = correo
-        self.__contrasena = contrasena
+        self.correo = correo
+        self.__contrasena_hash = contrasena_hash
 
 
     @property
@@ -22,9 +22,9 @@ class Usuario(ABC):
 
     @nombre.setter
     def nombre(self, nombre):
-        if nombre.strip() == "":
-            raise ValueError ("El nombre no puede quedar vacío")
-        self.__nombre = nombre
+        if not isinstance(nombre, str) or nombre.strip() == "":
+            raise ValueError("El nombre no puede quedar vacío")
+        self.__nombre = nombre.strip()
 
 
     @property
@@ -39,16 +39,16 @@ class Usuario(ABC):
 
     @correo.setter
     def correo(self, correo):
-        if "@" not in correo:
-            raise ValueError ("El correo debe contener @")
-        self.__correo = correo
+        if not isinstance(correo, str) or "@" not in correo:
+            raise ValueError("El correo debe contener @")
+        self.__correo = correo.strip()
 
 
     @property
-    def contrasena(self):
-        return self.__contrasena
+    def contrasena_hash(self):
+        return self.__contrasena_hash
 
 
     @abstractmethod
-    def editar_perfil(self):
+    def editar_perfil(self, vista_horario):
         pass
