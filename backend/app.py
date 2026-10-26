@@ -3,7 +3,9 @@ import os
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, url_for, session
-from services.gestor_contrasenas import GestorContrasenas
+
+from services.autenticacion_service import AutenticacionService
+
 
 app = Flask(
     __name__,
@@ -13,9 +15,7 @@ app = Flask(
 
 app.secret_key = os.getenv("SECRET_KEY", "clave-de-desarrollo")
 
-RUTA_USUARIOS = os.path.join(
-    os.path.dirname(__file__), "data", "usuarios.json"
-)
+autenticacion = AutenticacionService()
 
 RUTA_HORARIOS = os.path.join(
     os.path.dirname(__file__), "data", "horarios.json"
@@ -25,16 +25,6 @@ RUTA_HORARIOS = os.path.join(
 def cargar_json(ruta):
     with open(ruta, encoding="utf-8") as archivo:
         return json.load(archivo)
-
-
-def buscar_usuario(correo):
-    usuarios = cargar_json(RUTA_USUARIOS)
-
-    for usuario in usuarios:
-        if usuario["correo"].lower() == correo.lower():
-            return usuario
-
-    return None
 
 
 def buscar_horario(cedula):
@@ -69,29 +59,32 @@ def login():
     error = None
 
     if request.method == "POST":
-        correo = request.form["correo"].strip()
-        contrasena = request.form["contrasena"]
+        correo = request.form.get("correo", "").strip()
+        contrasena = request.form.get("contrasena", "")
 
-        usuario = buscar_usuario(correo)
+        try:
+            usuario = autenticacion.iniciar_sesion(
+                correo,
+                contrasena
+            )
 
-        if usuario and GestorContrasenas.verificar_contrasena(
-            contrasena,
-            usuario["contrasena_hash"]
-        ):
+            session.clear()
             session["nombre"] = usuario["nombre"]
             session["cedula"] = usuario["cedula"]
+            session["correo"] = usuario["correo"]
             session["rol"] = usuario["rol"]
 
             return redirect(url_for("perfil"))
 
-        error = "Correo o contraseña incorrectos"
+        except ValueError:
+            error = "Correo o contraseña incorrectos"
 
     return render_template("login.html", error=error)
 
 
 @app.route("/logout")
 def logout():
-    session.clear()
+    autenticacion.cerrar_sesion(session)
     return redirect(url_for("login"))
 
 

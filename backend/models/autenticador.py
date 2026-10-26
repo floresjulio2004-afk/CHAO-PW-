@@ -8,5 +8,5 @@ class Autenticador(ABC):
 
 
     @abstractmethod
-    def cerrar_sesion(self):
+    def cerrar_sesion(self, sesion):
         pass
