@@ -13,7 +13,10 @@ app = Flask(
     static_folder="../frontend/static"
 )
 
-app.secret_key = os.getenv("SECRET_KEY", "clave-de-desarrollo")
+app.secret_key = os.getenv("SECRET_KEY")
+
+if not app.secret_key:
+    raise RuntimeError("La variable SECRET_KEY no está configurada")
 
 autenticacion = AutenticacionService()
 
