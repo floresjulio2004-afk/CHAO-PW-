@@ -1,35 +1,44 @@
-import json
-from pathlib import Path
-from werkzeug.security import check_password_hash
+from typing import Protocol
 from models.autenticador import Autenticador
 
 
+class UsuarioRepository(Protocol):
+    def obtener_todos(self):
+        ...
+
+
+class GestorContrasenasProtocol(Protocol):
+    def verificar_contrasena(self, contrasena, hash_guardado):
+        ...
+
+
 class AutenticacionService(Autenticador):
-    ROLES_VALIDOS = {
-        "estudiante",
-        "docente",
-        "gestor",
-        "administrador"
-    }
-
-
-    def __init__(self, ruta_usuarios=None):
-        if ruta_usuarios is None:
-            ruta_usuarios = (
-                Path(__file__).resolve().parents[1]
-                / "data"
-                / "usuarios.json"
+    def __init__(self, usuario_repository, gestor_contrasenas):
+        if not callable(getattr(usuario_repository, "obtener_todos", None)):
+            raise TypeError(
+                "El repositorio debe implementar obtener_todos()."
             )
-        self.__ruta_usuarios = Path(ruta_usuarios)
+        if not callable(
+            getattr(gestor_contrasenas, "verificar_contrasena", None)
+        ):
+            raise TypeError(
+                "El gestor debe implementar verificar_contrasena()."
+            )
+        self.__usuario_repository = usuario_repository
+        self.__gestor_contrasenas = gestor_contrasenas
 
 
-    def iniciar_sesion(self, correo, contrasena):
+    def autenticar(self, correo, contrasena):
         if not isinstance(correo, str) or not correo.strip():
-            raise ValueError("El correo no puede quedar vacío")
+            raise ValueError("El correo no puede quedar vacío.")
         if not isinstance(contrasena, str) or not contrasena:
-            raise ValueError("La contraseña no puede quedar vacía")
+            raise ValueError("La contraseña no puede quedar vacía.")
         correo = correo.strip().lower()
-        usuarios = self.__cargar_usuarios()
+        usuarios = self.__usuario_repository.obtener_todos()
+        if not isinstance(usuarios, list):
+            raise ValueError(
+                "El repositorio debe devolver una lista de usuarios."
+            )
         for usuario in usuarios:
             if not isinstance(usuario, dict):
                 continue
@@ -42,48 +51,24 @@ class AutenticacionService(Autenticador):
                 continue
             if not isinstance(contrasena_hash, str):
                 break
-            if not isinstance(rol, str) or rol not in self.ROLES_VALIDOS:
+            if not isinstance(rol, str) or not rol.strip():
                 break
-            try:
-                contrasena_correcta = check_password_hash(
-                    contrasena_hash,
-                    contrasena
+            contrasena_correcta = (
+                self.__gestor_contrasenas.verificar_contrasena(
+                    contrasena,
+                    contrasena_hash
                 )
-            except (ValueError, TypeError):
-                contrasena_correcta = False
+            )
             if not contrasena_correcta:
                 break
             return {
                 "nombre": usuario.get("nombre"),
                 "cedula": usuario.get("cedula"),
-                "correo": correo_guardado,
-                "rol": rol
+                "correo": correo_guardado.strip().lower(),
+                "rol": rol.strip().lower()
             }
-        raise ValueError("Correo o contraseña incorrectos")
+        raise ValueError("Correo o contraseña incorrectos.")
 
 
-    def cerrar_sesion(self, sesion):
-        sesion.clear()
-        return "Sesión cerrada correctamente."
-
-
-    def __cargar_usuarios(self):
-        if not self.__ruta_usuarios.is_file():
-            raise FileNotFoundError(
-                f"No se encontró el archivo: {self.__ruta_usuarios}"
-            )
-        try:
-            with self.__ruta_usuarios.open(
-                "r",
-                encoding="utf-8"
-            ) as archivo:
-                usuarios = json.load(archivo)
-        except json.JSONDecodeError as error:
-            raise ValueError(
-                "El archivo de usuarios contiene JSON inválido"
-            ) from error
-        if not isinstance(usuarios, list):
-            raise ValueError(
-                "El archivo JSON debe contener una lista de usuarios"
-            )
-        return usuarios
+    def iniciar_sesion(self, correo, contrasena):
+        return self.autenticar(correo, contrasena)
