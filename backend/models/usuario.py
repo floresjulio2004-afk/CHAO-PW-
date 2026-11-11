@@ -1,8 +1,13 @@
+import uuid
 from abc import ABC, abstractmethod
 
 
 class Usuario(ABC):
     def __init__(self, id_usuario, nombre, cedula, correo, contrasena_hash, rol):
+        if id_usuario is None:
+            id_usuario = f"USR-{uuid.uuid4()}"
+        elif not isinstance(id_usuario, str) or not id_usuario.strip():
+            raise ValueError("El ID del usuario no es válido.")
         self.__id_usuario = id_usuario
         self.nombre = nombre
         self.cedula = cedula

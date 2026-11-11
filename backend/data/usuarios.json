@@ -1,5 +1,6 @@
 [
     {
+        "id_usuario": "USR-1b41c690-186a-4f78-962a-cf8cf2d490c2",
         "nombre": "Julio Flores",
         "cedula": "1310000011",
         "correo": "e1310000011@live.uleam.edu.ec",
@@ -7,6 +8,7 @@
         "contrasena_hash": "scrypt:32768:8:1$liG1u5ORWJ0TEXJI$7d3329ba97ee8cc1c6252f09c456e49a6a186d8ebb13efce765648afba095ad1246d089a942a8a504f79c23c35b0d60f32eb0ebff807b2277f6a526bd2e9dae8"
     },
     {
+        "id_usuario": "USR-1b01947a-9e56-496f-acf0-60b5f1c67aaf",
         "nombre": "Albert Moreira",
         "cedula": "1310000234",
         "correo": "p1310000234@live.uleam.edu.ec",
@@ -14,13 +16,15 @@
         "contrasena_hash": "scrypt:32768:8:1$liG1u5ORWJ0TEXJI$7d3329ba97ee8cc1c6252f09c456e49a6a186d8ebb13efce765648afba095ad1246d089a942a8a504f79c23c35b0d60f32eb0ebff807b2277f6a526bd2e9dae8"
     },
     {
+        "id_usuario": "USR-0bd6098f-d531-4934-8463-06491f384ab2",
         "nombre": "Luis Anchundia",
         "cedula": "1310003422",
-        "correo": "g1310003422@live.uleam.edu.ec",
-        "rol": "gestor",
+        "correo": "c1310003422@live.uleam.edu.ec",
+        "rol": "coordinador",
         "contrasena_hash": "scrypt:32768:8:1$liG1u5ORWJ0TEXJI$7d3329ba97ee8cc1c6252f09c456e49a6a186d8ebb13efce765648afba095ad1246d089a942a8a504f79c23c35b0d60f32eb0ebff807b2277f6a526bd2e9dae8"
     },
     {
+        "id_usuario": "USR-75b22019-2a4c-4a99-91ad-bdba8d157f7b",
         "nombre": "Oscar Mero",
         "cedula": "1310005544",
         "correo": "a1310005544@live.uleam.edu.ec",

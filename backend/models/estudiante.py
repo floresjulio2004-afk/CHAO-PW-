@@ -1,9 +1,9 @@
-from usuario import Usuario
+from models.usuario import Usuario
 
 
 class Estudiante(Usuario):
-    def __init__(self, id_usuario, nombre, cedula, correo, contrasena_hash, nivel):
-        super().__init__(id_usuario, nombre, cedula, correo, contrasena_hash, "estudiante")
+    def __init__(self, nombre, cedula, correo, contrasena_hash, nivel):
+        super().__init__(None, nombre, cedula, correo, contrasena_hash, "estudiante")
         self.nivel = nivel
 
 

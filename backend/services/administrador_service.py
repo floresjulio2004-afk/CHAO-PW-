@@ -1,3 +1,6 @@
+from models.usuario import Usuario
+
+
 class AdministradorService:
     def __init__(self, usuario_repository, rol_repository, facultad_repository, carrera_repository, nivel_educativo_repository, configuracion_repository, sistema_service):
         self.__usuario_repository = usuario_repository
@@ -10,19 +13,21 @@ class AdministradorService:
 
     # GESTIÓN DE USUARIOS
     def crear_usuario(self, usuario):
-        pass
+        if not isinstance(usuario, Usuario):
+            raise TypeError("El usuario debe ser un objeto de tipo Usuario.")
+        return self.__usuario_repository.guardar(usuario)
 
 
     def consultar_usuarios(self):
-        pass
+        return self.__usuario_repository.obtener_todos()
 
 
     def modificar_usuario(self, id_usuario, datos):
-        pass
+        return self.__usuario_repository.actualizar(id_usuario, datos)
 
 
     def eliminar_usuario(self, id_usuario):
-        pass
+        return self.__usuario_repository.eliminar(id_usuario)
 
     # GESTIÓN DE ROLES
     def crear_rol(self, rol):

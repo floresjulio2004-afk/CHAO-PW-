@@ -1,10 +1,16 @@
 import json
 import os
 from functools import wraps
-
+from pathlib import Path
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session
-
+from repositories.usuario_json_repository import UsuarioJsonRepository
 from services.autenticacion_service import AutenticacionService
+from services.gestor_contrasenas import GestorContrasenas
+
+
+RUTA_ENV = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(RUTA_ENV)
 
 
 app = Flask(
@@ -13,12 +19,19 @@ app = Flask(
     static_folder="../frontend/static"
 )
 
-app.secret_key = os.getenv("SECRET_KEY")
 
+app.secret_key = os.getenv("SECRET_KEY")
 if not app.secret_key:
     raise RuntimeError("La variable SECRET_KEY no está configurada")
 
-autenticacion = AutenticacionService()
+
+usuario_repository = UsuarioJsonRepository()
+gestor_contrasenas = GestorContrasenas()
+autenticacion = AutenticacionService(
+    usuario_repository,
+    gestor_contrasenas
+)
+
 
 RUTA_HORARIOS = os.path.join(
     os.path.dirname(__file__), "data", "horarios.json"
@@ -41,14 +54,10 @@ def rol_requerido(rol):
         def envoltura(*args, **kwargs):
             if "rol" not in session:
                 return redirect(url_for("login"))
-
             if session["rol"] != rol:
                 return redirect(url_for("perfil"))
-
             return funcion(*args, **kwargs)
-
         return envoltura
-
     return decorador
 
 
@@ -60,34 +69,29 @@ def inicio():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     error = None
-
     if request.method == "POST":
         correo = request.form.get("correo", "").strip()
         contrasena = request.form.get("contrasena", "")
-
         try:
             usuario = autenticacion.iniciar_sesion(
                 correo,
                 contrasena
             )
-
             session.clear()
+            session["id"] = usuario["id"]
             session["nombre"] = usuario["nombre"]
             session["cedula"] = usuario["cedula"]
             session["correo"] = usuario["correo"]
             session["rol"] = usuario["rol"]
-
             return redirect(url_for("perfil"))
-
         except ValueError:
             error = "Correo o contraseña incorrectos"
-
     return render_template("login.html", error=error)
 
 
 @app.route("/logout")
 def logout():
-    autenticacion.cerrar_sesion(session)
+    session.clear()
     return redirect(url_for("login"))
 
 
@@ -95,7 +99,6 @@ def logout():
 def perfil():
     if "rol" not in session:
         return redirect(url_for("login"))
-
     return redirect(url_for(session["rol"]))
 
 
@@ -112,17 +115,12 @@ def estudiante():
 @rol_requerido("estudiante")
 def estudiante_horario():
     cedula = session.get("cedula")
-
     print("CÉDULA EN SESIÓN:", cedula)
-
     if not cedula:
         print("ERROR: No se encontró la cédula en la sesión.")
         return redirect(url_for("login"))
-
     clases = buscar_horario(cedula)
-
     print("CANTIDAD DE CLASES:", len(clases))
-
     dias = [
         "Lunes",
         "Martes",
@@ -130,18 +128,14 @@ def estudiante_horario():
         "Jueves",
         "Viernes"
     ]
-
     franjas = sorted({
         (clase["hora_inicio"], clase["hora_fin"])
         for clase in clases
     })
-
     grilla = {}
-
     for clase in clases:
         clave = (clase["dia"], clase["hora_inicio"])
         grilla[clave] = clase
-
     return render_template(
         "horario.html",
         nombre=session["nombre"],
@@ -155,15 +149,12 @@ def estudiante_horario():
 @rol_requerido("estudiante")
 def estudiante_clase(id_clase):
     clases = buscar_horario(session["cedula"])
-
     clase = next(
         (c for c in clases if c["id"] == id_clase),
         None
     )
-
     if clase is None:
         return "No se encontró la clase solicitada.", 404
-
     return render_template(
         "clase.html",
         clase=clase
