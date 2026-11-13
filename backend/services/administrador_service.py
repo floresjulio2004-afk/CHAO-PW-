@@ -1,4 +1,5 @@
 from models.usuario import Usuario
+from factories.creador_usuario import CreadorUsuario
 
 
 class AdministradorService:
@@ -16,6 +17,19 @@ class AdministradorService:
         if not isinstance(usuario, Usuario):
             raise TypeError("El usuario debe ser un objeto de tipo Usuario.")
         return self.__usuario_repository.guardar(usuario)
+
+        
+    def crear_usuario_desde_fabrica(self, fabrica, nombre, cedula, correo, contrasena_hash, **datos):
+        if not isinstance(fabrica, CreadorUsuario):
+            raise TypeError("La fábrica debe implementar CreadorUsuario.")
+        usuario = fabrica.crear_usuario(
+            nombre,
+            cedula,
+            correo,
+            contrasena_hash,
+            **datos
+        )
+        return self.crear_usuario(usuario)
 
 
     def consultar_usuarios(self):

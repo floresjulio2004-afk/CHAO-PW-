@@ -41,7 +41,7 @@ class AutenticacionService(Autenticador):
         if not contrasena_correcta:
             raise ValueError("Correo o contraseña incorrectos.")
         return {
-            "id": usuario.get("id"),
+            "id": usuario.get("id_usuario"),
             "nombre": usuario.get("nombre"),
             "cedula": usuario.get("cedula"),
             "correo": correo,
