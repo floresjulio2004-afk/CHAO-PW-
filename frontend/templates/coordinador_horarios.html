@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block titulo %}Gestión de horarios | C.H.A.O.{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/coordinador.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<a class="volver" href="{{ url_for('coordinador') }}">← Volver al perfil</a>
+
+<section>
+    <h2>Gestión de horarios</h2>
+    <p>Coordinador: <strong>{{ nombre }}</strong></p>
+
+    {% for categoria, mensaje in get_flashed_messages(with_categories=true) %}
+    <p class="aviso {{ categoria }}">{{ mensaje }}</p>
+    {% endfor %}
+</section>
+
+<section class="panel">
+    <h3>Crear horario</h3>
+
+    {% if not docentes %}
+    <p class="aviso error">No hay docentes registrados. Un administrador debe crearlos primero en Gestión de usuarios.</p>
+    {% endif %}
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" class="formulario-horario">
+        <div class="cuadricula">
+            <div>
+                <label for="id_asignatura">Asignatura</label>
+                <select id="id_asignatura" name="id_asignatura" required>
+                    <option value="">Elige una asignatura</option>
+                    {% for a in asignaturas %}
+                    <option value="{{ a.id_asignatura }}" {% if formulario.get('id_asignatura') == a.id_asignatura %}selected{% endif %}>{{ a.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="id_paralelo">Paralelo</label>
+                <select id="id_paralelo" name="id_paralelo" required>
+                    <option value="">Elige un paralelo</option>
+                    {% for p in paralelos %}
+                    <option value="{{ p.id_paralelo }}" {% if formulario.get('id_paralelo') == p.id_paralelo %}selected{% endif %}>Paralelo {{ p.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="id_periodo">Periodo académico</label>
+                <select id="id_periodo" name="id_periodo" required>
+                    <option value="">Elige un periodo</option>
+                    {% for pe in periodos %}
+                    <option value="{{ pe.id_periodo }}" {% if formulario.get('id_periodo') == pe.id_periodo %}selected{% endif %}>{{ pe.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="id_docente">Docente</label>
+                <select id="id_docente" name="id_docente" required>
+                    <option value="">Elige un docente</option>
+                    {% for d in docentes %}
+                    <option value="{{ d.id_usuario }}" {% if formulario.get('id_docente') == d.id_usuario %}selected{% endif %}>{{ d.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <h4>Sesiones (llena al menos una)</h4>
+        {% for fila in formulario['filas'] %}
+        <div class="fila-sesion">
+            <select name="dia" aria-label="Día">
+                <option value="">Día</option>
+                {% for d in dias %}
+                <option value="{{ d }}" {% if fila['dia'] == d %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+            </select>
+            <input type="time" name="hora_inicio" value="{{ fila['hora_inicio'] }}" aria-label="Hora de inicio">
+            <input type="time" name="hora_fin" value="{{ fila['hora_fin'] }}" aria-label="Hora de fin">
+            <select name="aula" aria-label="Aula">
+                <option value="">Aula</option>
+                {% for au in aulas %}
+                <option value="{{ au.id_aula }}" {% if fila['aula'] == au.id_aula %}selected{% endif %}>{{ au.id_aula }} · {{ au.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endfor %}
+
+        <h4>Estudiantes inscritos (opcional)</h4>
+        {% if estudiantes %}
+        <div class="lista-estudiantes">
+            {% for e in estudiantes %}
+            <label class="casilla">
+                <input type="checkbox" name="estudiantes" value="{{ e.id_usuario }}" {% if e.id_usuario in formulario['estudiantes'] %}checked{% endif %}>
+                {{ e.nombre }} ({{ e.cedula }})
+            </label>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No hay estudiantes registrados.</p>
+        {% endif %}
+
+        <label for="observacion">Observación (opcional)</label>
+        <input type="text" id="observacion" name="observacion" value="{{ formulario.get('observacion', '') }}">
+
+        <button type="submit">Crear horario</button>
+    </form>
+</section>
+
+<section class="panel">
+    <h3>Horarios creados ({{ horarios|length }})</h3>
+
+    {% if horarios %}
+    <div class="tabla-scroll">
+        <table class="tabla-horarios">
+            <thead>
+                <tr>
+                    <th>Asignatura</th>
+                    <th>Paralelo</th>
+                    <th>Periodo</th>
+                    <th>Docente</th>
+                    <th>Sesiones</th>
+                    <th>Inscritos</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in horarios %}
+                <tr>
+                    <td>{{ h['asignatura'] }}{% if h['observacion'] %}<br><small>{{ h['observacion'] }}</small>{% endif %}</td>
+                    <td>{{ h['paralelo'] }}</td>
+                    <td>{{ h['periodo'] }}</td>
+                    <td>{{ h['docente'] }}</td>
+                    <td class="sesiones-celda">
+                        {% for s in h['sesiones'] %}
+                        {{ s['dia'] }} {{ s['hora_inicio'] }}–{{ s['hora_fin'] }} · Aula {{ s['id_aula'] }}<br>
+                        {% endfor %}
+                    </td>
+                    <td>{{ h['inscritos'] }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('coord_horarios.eliminar', id_horario=h['id_horario']) }}" onsubmit="return confirm('¿Eliminar este horario?');">
+                            <button type="submit" class="btn-eliminar">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Aún no hay horarios creados.</p>
+    {% endif %}
+</section>
+{% endblock %}

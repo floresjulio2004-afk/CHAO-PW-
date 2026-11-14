@@ -30,5 +30,35 @@
         "correo": "a1310005544@live.uleam.edu.ec",
         "rol": "administrador",
         "contrasena_hash": "scrypt:32768:8:1$liG1u5ORWJ0TEXJI$7d3329ba97ee8cc1c6252f09c456e49a6a186d8ebb13efce765648afba095ad1246d089a942a8a504f79c23c35b0d60f32eb0ebff807b2277f6a526bd2e9dae8"
+    },
+    {
+        "id_usuario": "USR-752e14f4-421b-4d90-b86e-261f50621182",
+        "nombre": "Carlos Zambrano",
+        "cedula": "1300000001",
+        "correo": "p1300000001@live.uleam.edu.ec",
+        "contrasena_hash": "scrypt:32768:8:1$xKdIYEO61crIyKBF$fd3d0f6ffe637beefbdd8bbbd466e2f3d6006c606f29f81b9578635c970b1f07c5339cf5cb8bb3be3b55d98826654d864d2f13fc50e3c4a023efe236aa317c13",
+        "rol": "docente",
+        "tema": "claro",
+        "especialidad": "Programación Estructurada"
+    },
+    {
+        "id_usuario": "USR-d90ef89e-957e-453b-8599-d60ac7161e74",
+        "nombre": "Pedro Intriago",
+        "cedula": "1300000002",
+        "correo": "p1300000002@live.uleam.edu.ec",
+        "contrasena_hash": "scrypt:32768:8:1$eWRVYcp8on8X6i8w$2c92649ce9c2522b06f8f214d408846d0238d479aa9433b662c62babebf83c556f68dbce981046f1ca9606f116704e3f971c99204ecd1ca98ce47bbbbb7be15c",
+        "rol": "docente",
+        "tema": "claro",
+        "especialidad": "Bases de Datos"
+    },
+    {
+        "id_usuario": "USR-b97981b9-572c-47d0-bcae-739abc1de248",
+        "nombre": "Robert Cedeño",
+        "cedula": "1300000003",
+        "correo": "p1300000003@live.uleam.edu.ec",
+        "contrasena_hash": "scrypt:32768:8:1$z81K52LxhG8y1Prp$192e4189ac28b1505f4fa04e0ab198ec06838c0d19d0e16437151fe9358a3846333d0303c8545247f473a629963a65c0f63c2ad56f6215d30a721f9cd41c09b1",
+        "rol": "docente",
+        "tema": "claro",
+        "especialidad": "Modelado Orientado a Objetos"
     }
 ]

@@ -1,0 +1,21 @@
+{
+    "asignaturas": [
+        {"id_asignatura": "ASG-POO", "codigo": "POO", "nombre": "Programación Orientada a Objetos", "creditos": 4},
+        {"id_asignatura": "ASG-RED", "codigo": "RED", "nombre": "Redes de Computadoras", "creditos": 4},
+        {"id_asignatura": "ASG-BDD", "codigo": "BDD", "nombre": "Bases de Datos", "creditos": 4},
+        {"id_asignatura": "ASG-MOO", "codigo": "MOO", "nombre": "Modelado Orientado a Objetos", "creditos": 3}
+    ],
+    "aulas": [
+        {"id_aula": "102", "nombre": "Laboratorio de Software", "capacidad": 30, "tipo": "laboratorio"},
+        {"id_aula": "103", "nombre": "Laboratorio de Cómputo", "capacidad": 30, "tipo": "laboratorio"},
+        {"id_aula": "205", "nombre": "Aula de Clases", "capacidad": 40, "tipo": "aula"},
+        {"id_aula": "301", "nombre": "Aula de Diseño", "capacidad": 25, "tipo": "aula"}
+    ],
+    "paralelos": [
+        {"id_paralelo": "PAR-A", "nombre": "A", "descripcion": "Paralelo A"},
+        {"id_paralelo": "PAR-B", "nombre": "B", "descripcion": "Paralelo B"}
+    ],
+    "periodos": [
+        {"id_periodo": "PER-2026-2", "nombre": "2026-2", "fecha_inicio": "2026-10-05", "fecha_fin": "2027-02-19", "estado": "activo"}
+    ]
+}

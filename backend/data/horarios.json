@@ -1,10 +1,100 @@
-{
-    "1310000011": [
-        {"id": 1, "dia": "Lunes", "hora_inicio": "07:00", "hora_fin": "09:00", "asignatura": "Programación Orientada a Objetos", "docente": "Albert Moreira", "salon": "Laboratorio de Software", "codigo_aula": "102"},
-        {"id": 2, "dia": "Lunes", "hora_inicio": "09:00", "hora_fin": "11:00", "asignatura": "Redes de Computadoras", "docente": "Carlos Zambrano", "salon": "Aula de Clases", "codigo_aula": "205"},
-        {"id": 3, "dia": "Martes", "hora_inicio": "07:00", "hora_fin": "09:00", "asignatura": "Bases de Datos", "docente": "Pedro Intriago", "salon": "Laboratorio de Cómputo", "codigo_aula": "103"},
-        {"id": 4, "dia": "Miércoles", "hora_inicio": "09:00", "hora_fin": "11:00", "asignatura": "Modelado Orientado a Objetos", "docente": "Robert Cedeño", "salon": "Aula de Diseño", "codigo_aula": "301"},
-        {"id": 5, "dia": "Jueves", "hora_inicio": "07:00", "hora_fin": "09:00", "asignatura": "Programación Orientada a Objetos", "docente": "Albert Moreira", "salon": "Laboratorio de Software", "codigo_aula": "102"},
-        {"id": 6, "dia": "Viernes", "hora_inicio": "09:00", "hora_fin": "11:00", "asignatura": "Bases de Datos", "docente": "Pedro Intriago", "salon": "Laboratorio de Cómputo", "codigo_aula": "103"}
-    ]
-}
+[
+    {
+        "id_horario": "HOR-0001",
+        "id_asignatura": "ASG-POO",
+        "id_paralelo": "PAR-A",
+        "id_periodo": "PER-2026-2",
+        "id_docente": "USR-1b01947a-9e56-496f-acf0-60b5f1c67aaf",
+        "estado": "activo",
+        "observacion": "",
+        "tiempos": [
+            {
+                "id_tiempo": "TMP-0001",
+                "dia": "Lunes",
+                "hora_inicio": "07:00",
+                "hora_fin": "09:00",
+                "id_aula": "102"
+            },
+            {
+                "id_tiempo": "TMP-0002",
+                "dia": "Jueves",
+                "hora_inicio": "07:00",
+                "hora_fin": "09:00",
+                "id_aula": "102"
+            }
+        ],
+        "estudiantes": [
+            "USR-1b41c690-186a-4f78-962a-cf8cf2d490c2"
+        ]
+    },
+    {
+        "id_horario": "HOR-512b77f8-5b4f-4af6-aa59-ae7bc3e3b65c",
+        "id_asignatura": "ASG-RED",
+        "id_paralelo": "PAR-A",
+        "id_periodo": "PER-2026-2",
+        "id_docente": "USR-1b01947a-9e56-496f-acf0-60b5f1c67aaf",
+        "estado": "activo",
+        "observacion": "",
+        "tiempos": [
+            {
+                "id_tiempo": "TMP-14e3bbb4-bf86-48b6-94ea-c948ba9fccfa",
+                "dia": "Lunes",
+                "hora_inicio": "09:00",
+                "hora_fin": "11:00",
+                "id_aula": "205"
+            }
+        ],
+        "estudiantes": [
+            "USR-1b41c690-186a-4f78-962a-cf8cf2d490c2"
+        ]
+    },
+    {
+        "id_horario": "HOR-2625a7d1-1957-4ad3-8a6b-928cbfd45eb1",
+        "id_asignatura": "ASG-BDD",
+        "id_paralelo": "PAR-A",
+        "id_periodo": "PER-2026-2",
+        "id_docente": "USR-d90ef89e-957e-453b-8599-d60ac7161e74",
+        "estado": "activo",
+        "observacion": "",
+        "tiempos": [
+            {
+                "id_tiempo": "TMP-2f509d1c-5894-435f-9049-ca57d5b689da",
+                "dia": "Martes",
+                "hora_inicio": "07:00",
+                "hora_fin": "09:00",
+                "id_aula": "103"
+            },
+            {
+                "id_tiempo": "TMP-f431f044-a3f3-4752-992b-b3ffcf97007f",
+                "dia": "Viernes",
+                "hora_inicio": "09:00",
+                "hora_fin": "11:00",
+                "id_aula": "103"
+            }
+        ],
+        "estudiantes": [
+            "USR-1b41c690-186a-4f78-962a-cf8cf2d490c2"
+        ]
+    },
+    {
+        "id_horario": "HOR-5769fe16-8850-405f-a8a0-2be248d7b784",
+        "id_asignatura": "ASG-MOO",
+        "id_paralelo": "PAR-A",
+        "id_periodo": "PER-2026-2",
+        "id_docente": "USR-b97981b9-572c-47d0-bcae-739abc1de248",
+        "estado": "activo",
+        "observacion": "",
+        "tiempos": [
+            {
+                "id_tiempo": "TMP-090b15a3-03f6-4444-b4a2-bfddb7abd70b",
+                "dia": "Miércoles",
+                "hora_inicio": "09:00",
+                "hora_fin": "11:00",
+                "id_aula": "301"
+            }
+        ],
+        "estudiantes": [
+            "USR-1b41c690-186a-4f78-962a-cf8cf2d490c2"
+        ]
+    }
+]

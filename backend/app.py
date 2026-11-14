@@ -1,15 +1,24 @@
-import json
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session
+from builders.constructor_horario import ConstructorHorario, DIAS_SEMANA
 from factories.registro_fabricas import RegistroFabricas
+from models.asignatura import Asignatura
+from models.aula import Aula
+from models.paralelo import Paralelo
+from models.periodo_academico import PeriodoAcademico
+from repositories.catalogo_json_repository import CatalogoJsonRepository
+from repositories.horario_json_repository import HorarioJsonRepository
 from repositories.usuario_json_repository import UsuarioJsonRepository
 from routes.administrador_routes import crear_blueprint_administrador
+from routes.coordinador_routes import crear_blueprint_coordinador
 from routes.seguridad import rol_requerido
 from services.administrador_service import AdministradorService
 from services.autenticacion_service import AutenticacionService
+from services.coordinador_service import CoordinadorService
 from services.gestor_contrasenas import GestorContrasenas
+from services.horario_service import HorarioService
 
 
 RUTA_ENV = Path(__file__).resolve().parent.parent / ".env"
@@ -28,12 +37,38 @@ if not app.secret_key:
     raise RuntimeError("La variable SECRET_KEY no está configurada")
 
 
+RUTA_CATALOGOS = Path(__file__).resolve().parent / "data" / "catalogos.json"
+ROLES_VALIDOS = {"estudiante", "docente", "coordinador", "administrador"}
+
+
+# Repositorios
 usuario_repository = UsuarioJsonRepository()
+horario_repository = HorarioJsonRepository()
+asignatura_repository = CatalogoJsonRepository(
+    RUTA_CATALOGOS, "asignaturas", Asignatura, "id_asignatura"
+)
+aula_repository = CatalogoJsonRepository(
+    RUTA_CATALOGOS, "aulas", Aula, "id_aula"
+)
+paralelo_repository = CatalogoJsonRepository(
+    RUTA_CATALOGOS, "paralelos", Paralelo, "id_paralelo"
+)
+periodo_repository = CatalogoJsonRepository(
+    RUTA_CATALOGOS, "periodos", PeriodoAcademico, "id_periodo"
+)
+
+# Servicios
 gestor_contrasenas = GestorContrasenas()
 registro_fabricas = RegistroFabricas.por_defecto()
 autenticacion = AutenticacionService(
     usuario_repository,
     gestor_contrasenas
+)
+horario_service = HorarioService(
+    horario_repository,
+    asignatura_repository,
+    aula_repository,
+    usuario_repository
 )
 # Los repositorios en None se conectarán cuando existan sus implementaciones.
 administrador_service = AdministradorService(
@@ -45,6 +80,16 @@ administrador_service = AdministradorService(
     configuracion_repository=None,
     sistema_service=None
 )
+coordinador_service = CoordinadorService(
+    horario_repository=horario_repository,
+    aula_repository=aula_repository,
+    asignatura_repository=asignatura_repository,
+    usuario_repository=usuario_repository,
+    paralelo_repository=paralelo_repository,
+    periodo_repository=periodo_repository,
+    horario_service=horario_service,
+    fabrica_constructor=ConstructorHorario
+)
 
 
 app.register_blueprint(
@@ -54,26 +99,9 @@ app.register_blueprint(
         gestor_contrasenas
     )
 )
-
-
-RUTA_HORARIOS = os.path.join(
-    os.path.dirname(__file__), "data", "horarios.json"
+app.register_blueprint(
+    crear_blueprint_coordinador(coordinador_service)
 )
-
-ROLES_VALIDOS = {"estudiante", "docente", "coordinador", "administrador"}
-DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
-
-
-def cargar_json(ruta):
-    if not os.path.exists(ruta):
-        return {}
-    with open(ruta, encoding="utf-8") as archivo:
-        return json.load(archivo)
-
-
-def buscar_horario(cedula):
-    horarios = cargar_json(RUTA_HORARIOS)
-    return horarios.get(cedula, [])
 
 
 @app.route("/")
@@ -132,18 +160,8 @@ def estudiante():
 @app.route("/estudiante/horario")
 @rol_requerido("estudiante")
 def estudiante_horario():
-    cedula = session.get("cedula")
-    if not cedula:
-        return redirect(url_for("login"))
-    clases = buscar_horario(cedula)
-    franjas = sorted({
-        (clase["hora_inicio"], clase["hora_fin"])
-        for clase in clases
-    })
-    grilla = {}
-    for clase in clases:
-        clave = (clase["dia"], clase["hora_inicio"])
-        grilla[clave] = clase
+    clases = horario_service.clases_de_estudiante(session["id"])
+    franjas, grilla = horario_service.armar_grilla(clases)
     return render_template(
         "horario.html",
         nombre=session["nombre"],
@@ -153,10 +171,10 @@ def estudiante_horario():
     )
 
 
-@app.route("/estudiante/clase/<int:id_clase>")
+@app.route("/estudiante/clase/<id_clase>")
 @rol_requerido("estudiante")
 def estudiante_clase(id_clase):
-    clases = buscar_horario(session["cedula"])
+    clases = horario_service.clases_de_estudiante(session["id"])
     clase = next(
         (c for c in clases if c["id"] == id_clase),
         None
