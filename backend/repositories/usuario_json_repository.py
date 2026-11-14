@@ -1,11 +1,15 @@
 import json
-import uuid
 from pathlib import Path
 from repositories.usuario_repository import UsuarioRepository
 from models.usuario import Usuario
 
 
 class UsuarioJsonRepository(UsuarioRepository):
+    CAMPOS_PROTEGIDOS = {
+        "id_usuario",
+        "rol",
+        "contrasena_hash"
+    }
 
 
     def __init__(self, ruta_archivo=None):
@@ -49,8 +53,10 @@ class UsuarioJsonRepository(UsuarioRepository):
     def obtener_por_id(self, id_usuario):
         usuarios = self.__leer_archivo()
         return next(
-            (usuario for usuario in usuarios
-             if usuario.get("id_usuario") == id_usuario),
+            (
+                usuario for usuario in usuarios
+                if usuario.get("id_usuario") == id_usuario
+            ),
             None
         )
 
@@ -61,9 +67,11 @@ class UsuarioJsonRepository(UsuarioRepository):
         correo = correo.strip().lower()
         usuarios = self.__leer_archivo()
         return next(
-            (usuario for usuario in usuarios
-             if isinstance(usuario.get("correo"), str)
-             and usuario["correo"].strip().lower() == correo),
+            (
+                usuario for usuario in usuarios
+                if isinstance(usuario.get("correo"), str)
+                and usuario["correo"].strip().lower() == correo
+            ),
             None
         )
 
@@ -86,25 +94,45 @@ class UsuarioJsonRepository(UsuarioRepository):
         elif isinstance(usuario, dict):
             usuario_guardado = usuario.copy()
         else:
-            raise TypeError("El usuario debe ser un objeto Usuario o un diccionario.")
-        correo = usuario_guardado.get("correo")
-        if not isinstance(correo, str) or not correo.strip():
-            raise ValueError("El usuario debe tener un correo válido.")
+            raise TypeError(
+                "El usuario debe ser un objeto Usuario o un diccionario."
+            )
+        campos_obligatorios = (
+            "id_usuario",
+            "nombre",
+            "cedula",
+            "correo",
+            "contrasena_hash",
+            "rol"
+        )
+        for campo in campos_obligatorios:
+            valor = usuario_guardado.get(campo)
+            if not isinstance(valor, str) or not valor.strip():
+                raise ValueError(
+                    f"El campo {campo} no puede quedar vacío."
+                )
+        correo = usuario_guardado["correo"].strip().lower()
+        usuario_guardado["correo"] = correo
         usuarios = self.__leer_archivo()
         if any(
-            isinstance(u.get("correo"), str)
-            and u["correo"].strip().lower() == correo.strip().lower()
+            u.get("correo", "").strip().lower() == correo
+            for u in usuarios
+            if isinstance(u.get("correo"), str)
+        ):
+            raise ValueError(
+                "Ya existe un usuario con ese correo."
+            )
+        cedula = usuario_guardado["cedula"].strip()
+        if any(u.get("cedula") == cedula for u in usuarios):
+            raise ValueError("Ya existe un usuario con esa cédula.")
+        usuario_guardado["cedula"] = cedula  
+        id_usuario = usuario_guardado["id_usuario"].strip()
+        if any(
+            u.get("id_usuario") == id_usuario
             for u in usuarios
         ):
-            raise ValueError("Ya existe un usuario con ese correo.")
-        id_usuario = usuario_guardado.get("id_usuario")
-        if not isinstance(id_usuario, str) or not id_usuario.strip():
-            id_usuario = f"USR-{uuid.uuid4()}"
-            while any(u.get("id_usuario") == id_usuario for u in usuarios):
-                id_usuario = f"USR-{uuid.uuid4()}"
-            usuario_guardado["id_usuario"] = id_usuario
-        elif any(u.get("id_usuario") == id_usuario for u in usuarios):
             raise ValueError("Ya existe un usuario con ese ID.")
+        usuario_guardado["id_usuario"] = id_usuario
         usuarios.append(usuario_guardado)
         self.__guardar_archivo(usuarios)
         return usuario_guardado
@@ -112,13 +140,39 @@ class UsuarioJsonRepository(UsuarioRepository):
 
     def actualizar(self, id_usuario, datos):
         if not isinstance(datos, dict):
-            raise TypeError("Los datos deben ser un diccionario.")
+            raise TypeError(
+                "Los datos deben ser un diccionario."
+            )
+        campos_protegidos = self.CAMPOS_PROTEGIDOS.intersection(datos)
+        if campos_protegidos:
+            raise ValueError(
+                "No se pueden modificar estos campos: "
+                + ", ".join(sorted(campos_protegidos))
+            )
         usuarios = self.__leer_archivo()
         for indice, usuario in enumerate(usuarios):
             if usuario.get("id_usuario") == id_usuario:
-                usuario_actualizado = {**usuario, **datos}
-                if usuario_actualizado.get("id_usuario") != id_usuario:
-                    raise ValueError("No se puede cambiar el ID del usuario.")
+                usuario_actualizado = {
+                    **usuario,
+                    **datos
+                }
+                correo = usuario_actualizado.get("correo")
+                if not isinstance(correo, str) or not correo.strip():
+                    raise ValueError(
+                        "El correo debe ser válido."
+                    )
+                correo = correo.strip().lower()
+                if any(
+                    otro.get("correo", "").strip().lower() == correo
+                    for posicion, otro in enumerate(usuarios)
+                    if posicion != indice
+                    and isinstance(otro.get("correo"), str)
+                ):
+                    raise ValueError(
+                        "Ya existe otro usuario con ese correo."
+                    )
+
+                usuario_actualizado["correo"] = correo
                 usuarios[indice] = usuario_actualizado
                 self.__guardar_archivo(usuarios)
                 return usuario_actualizado

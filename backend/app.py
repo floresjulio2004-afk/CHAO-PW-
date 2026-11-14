@@ -1,10 +1,13 @@
 import json
 import os
-from functools import wraps
 from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session
+from factories.registro_fabricas import RegistroFabricas
 from repositories.usuario_json_repository import UsuarioJsonRepository
+from routes.administrador_routes import crear_blueprint_administrador
+from routes.seguridad import rol_requerido
+from services.administrador_service import AdministradorService
 from services.autenticacion_service import AutenticacionService
 from services.gestor_contrasenas import GestorContrasenas
 
@@ -27,9 +30,29 @@ if not app.secret_key:
 
 usuario_repository = UsuarioJsonRepository()
 gestor_contrasenas = GestorContrasenas()
+registro_fabricas = RegistroFabricas.por_defecto()
 autenticacion = AutenticacionService(
     usuario_repository,
     gestor_contrasenas
+)
+# Los repositorios en None se conectarán cuando existan sus implementaciones.
+administrador_service = AdministradorService(
+    usuario_repository=usuario_repository,
+    rol_repository=None,
+    facultad_repository=None,
+    carrera_repository=None,
+    nivel_educativo_repository=None,
+    configuracion_repository=None,
+    sistema_service=None
+)
+
+
+app.register_blueprint(
+    crear_blueprint_administrador(
+        administrador_service,
+        registro_fabricas,
+        gestor_contrasenas
+    )
 )
 
 
@@ -37,8 +60,13 @@ RUTA_HORARIOS = os.path.join(
     os.path.dirname(__file__), "data", "horarios.json"
 )
 
+ROLES_VALIDOS = {"estudiante", "docente", "coordinador", "administrador"}
+DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+
 
 def cargar_json(ruta):
+    if not os.path.exists(ruta):
+        return {}
     with open(ruta, encoding="utf-8") as archivo:
         return json.load(archivo)
 
@@ -46,19 +74,6 @@ def cargar_json(ruta):
 def buscar_horario(cedula):
     horarios = cargar_json(RUTA_HORARIOS)
     return horarios.get(cedula, [])
-
-
-def rol_requerido(rol):
-    def decorador(funcion):
-        @wraps(funcion)
-        def envoltura(*args, **kwargs):
-            if "rol" not in session:
-                return redirect(url_for("login"))
-            if session["rol"] != rol:
-                return redirect(url_for("perfil"))
-            return funcion(*args, **kwargs)
-        return envoltura
-    return decorador
 
 
 @app.route("/")
@@ -99,6 +114,9 @@ def logout():
 def perfil():
     if "rol" not in session:
         return redirect(url_for("login"))
+    if session["rol"] not in ROLES_VALIDOS:
+        session.clear()
+        return redirect(url_for("login"))
     return redirect(url_for(session["rol"]))
 
 
@@ -115,19 +133,9 @@ def estudiante():
 @rol_requerido("estudiante")
 def estudiante_horario():
     cedula = session.get("cedula")
-    print("CÉDULA EN SESIÓN:", cedula)
     if not cedula:
-        print("ERROR: No se encontró la cédula en la sesión.")
         return redirect(url_for("login"))
     clases = buscar_horario(cedula)
-    print("CANTIDAD DE CLASES:", len(clases))
-    dias = [
-        "Lunes",
-        "Martes",
-        "Miércoles",
-        "Jueves",
-        "Viernes"
-    ]
     franjas = sorted({
         (clase["hora_inicio"], clase["hora_fin"])
         for clase in clases
@@ -139,7 +147,7 @@ def estudiante_horario():
     return render_template(
         "horario.html",
         nombre=session["nombre"],
-        dias=dias,
+        dias=DIAS_SEMANA,
         franjas=franjas,
         grilla=grilla
     )
@@ -170,11 +178,11 @@ def docente():
     )
 
 
-@app.route("/gestor")
-@rol_requerido("gestor")
-def gestor():
+@app.route("/coordinador")
+@rol_requerido("coordinador")
+def coordinador():
     return render_template(
-        "perfil_gestor.html",
+        "perfil_coordinador.html",
         nombre=session["nombre"]
     )
 

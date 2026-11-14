@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block titulo %}Gestión de usuarios | C.H.A.O.{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<a class="volver" href="{{ url_for('administrador') }}">← Volver al perfil</a>
+
+<section>
+    <h2>Gestión de usuarios</h2>
+    <p>Administrador: <strong>{{ nombre }}</strong></p>
+
+    {% for categoria, mensaje in get_flashed_messages(with_categories=true) %}
+    <p class="aviso {{ categoria }}">{{ mensaje }}</p>
+    {% endfor %}
+</section>
+
+<section class="panel">
+    <h3>Crear usuario</h3>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" class="formulario-usuario">
+        <label for="rol">Rol</label>
+        <select id="rol" name="rol" required>
+            {% for r in roles %}
+            <option value="{{ r }}" {% if formulario.get('rol') == r %}selected{% endif %}>{{ r|capitalize }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" value="{{ formulario.get('nombre', '') }}" required>
+
+        <label for="cedula">Cédula</label>
+        <input type="text" id="cedula" name="cedula" value="{{ formulario.get('cedula', '') }}" inputmode="numeric" required>
+
+        <label for="correo">Correo institucional</label>
+        <input type="email" id="correo" name="correo" value="{{ formulario.get('correo', '') }}" required>
+
+        <label for="contrasena">Contraseña (mínimo 8 caracteres)</label>
+        <input type="password" id="contrasena" name="contrasena" minlength="8" autocomplete="new-password" required>
+
+        <div id="campo-nivel">
+            <label for="nivel">Nivel del estudiante</label>
+            <input type="text" id="nivel" name="nivel" placeholder="Ej: 3er semestre" value="{{ formulario.get('nivel', '') }}">
+        </div>
+
+        <div id="campo-especialidad">
+            <label for="especialidad">Especialidad del docente</label>
+            <input type="text" id="especialidad" name="especialidad" placeholder="Ej: Programación" value="{{ formulario.get('especialidad', '') }}">
+        </div>
+
+        <button type="submit">Crear usuario</button>
+    </form>
+</section>
+
+<section class="panel">
+    <h3>Usuarios registrados ({{ usuarios|length }})</h3>
+
+    <div class="tabla-scroll">
+        <table class="tabla-usuarios">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cédula</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Detalle</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr>
+                    <td>{{ u.nombre }}</td>
+                    <td>{{ u.cedula }}</td>
+                    <td>{{ u.correo }}</td>
+                    <td><span class="rol rol-{{ u.rol }}">{{ u.rol|capitalize }}</span></td>
+                    <td>{{ u.nivel or u.especialidad or "—" }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('admin_usuarios.eliminar', id_usuario=u.id_usuario) }}" onsubmit="return confirm('¿Eliminar este usuario?');">
+                            <button type="submit" class="btn-eliminar">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    const selectorRol = document.getElementById("rol");
+
+    function actualizarCampos() {
+        const rol = selectorRol.value;
+        document.getElementById("campo-nivel").hidden = rol !== "estudiante";
+        document.getElementById("campo-especialidad").hidden = rol !== "docente";
+    }
+
+    selectorRol.addEventListener("change", actualizarCampos);
+    actualizarCampos();
+</script>
+{% endblock %}

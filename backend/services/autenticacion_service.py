@@ -1,5 +1,4 @@
 from models.autenticador import Autenticador
-from repositories.usuario_repository import UsuarioRepository
 
 
 class AutenticacionService(Autenticador):
@@ -40,12 +39,15 @@ class AutenticacionService(Autenticador):
         )
         if not contrasena_correcta:
             raise ValueError("Correo o contraseña incorrectos.")
+        rol = usuario.get("rol")
+        if not isinstance(rol, str) or not rol.strip():
+            raise ValueError("El usuario tiene un rol inválido.")
         return {
             "id": usuario.get("id_usuario"),
             "nombre": usuario.get("nombre"),
             "cedula": usuario.get("cedula"),
             "correo": correo,
-            "rol": usuario.get("rol", "").strip().lower()
+            "rol": rol.strip().lower()
         }
 
 
