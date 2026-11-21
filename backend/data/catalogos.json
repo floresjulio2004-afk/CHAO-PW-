@@ -1,4 +1,22 @@
 {
+    "facultades": [
+        {"id_facultad": "FAC-INF", "nombre": "Facultad de Ciencias Informáticas"}
+    ],
+    "carreras": [
+        {"id_carrera": "CAR-SOF", "nombre": "Ingeniería en Software", "codigo": "SOF", "id_facultad": "FAC-INF"},
+        {"id_carrera": "CAR-TI", "nombre": "Tecnologías de la Información", "codigo": "TI", "id_facultad": "FAC-INF"}
+    ],
+    "niveles": [
+        {"id_nivel": "NIV-1", "nombre": "Primer semestre", "descripcion": "Nivel 1"},
+        {"id_nivel": "NIV-2", "nombre": "Segundo semestre", "descripcion": "Nivel 2"},
+        {"id_nivel": "NIV-3", "nombre": "Tercer semestre", "descripcion": "Nivel 3"},
+        {"id_nivel": "NIV-4", "nombre": "Cuarto semestre", "descripcion": "Nivel 4"},
+        {"id_nivel": "NIV-5", "nombre": "Quinto semestre", "descripcion": "Nivel 5"},
+        {"id_nivel": "NIV-6", "nombre": "Sexto semestre", "descripcion": "Nivel 6"},
+        {"id_nivel": "NIV-7", "nombre": "Séptimo semestre", "descripcion": "Nivel 7"},
+        {"id_nivel": "NIV-8", "nombre": "Octavo semestre", "descripcion": "Nivel 8"},
+        {"id_nivel": "NIV-9", "nombre": "Noveno semestre", "descripcion": "Nivel 9"}
+    ],
     "asignaturas": [
         {"id_asignatura": "ASG-POO", "codigo": "POO", "nombre": "Programación Orientada a Objetos", "creditos": 4},
         {"id_asignatura": "ASG-RED", "codigo": "RED", "nombre": "Redes de Computadoras", "creditos": 4},
