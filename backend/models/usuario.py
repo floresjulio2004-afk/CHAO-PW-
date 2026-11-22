@@ -45,9 +45,11 @@ class Usuario(ABC):
             raise ValueError("La cédula no puede quedar vacía.")
         self.__cedula = cedula.strip()
 
+
     @property
     def correo(self):
         return self.__correo
+
 
     @correo.setter
     def correo(self, correo):
@@ -82,6 +84,10 @@ class Usuario(ABC):
         if tema not in ("claro", "oscuro"):
             raise ValueError("El tema debe ser claro u oscuro.")
         self.__tema = tema
+
+
+    def datos_adicionales(self):
+        return {}
 
 
     @abstractmethod
