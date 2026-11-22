@@ -1,8 +1,9 @@
 class Carrera:
-    def __init__(self, id_carrera, nombre, codigo):
+    def __init__(self, id_carrera, nombre, codigo, id_facultad):
         self.id_carrera = id_carrera
         self.nombre = nombre
         self.codigo = codigo
+        self.id_facultad = id_facultad
 
 
     @property
@@ -39,3 +40,15 @@ class Carrera:
         if codigo is None or not str(codigo).strip():
             raise ValueError("El código de la carrera no puede quedar vacío.")
         self.__codigo = str(codigo).strip()
+
+
+    @property
+    def id_facultad(self):
+        return self.__id_facultad
+
+
+    @id_facultad.setter
+    def id_facultad(self, id_facultad):
+        if id_facultad is None or not str(id_facultad).strip():
+            raise ValueError("La facultad de la carrera no puede quedar vacia.")
+        self.__id_facultad = str(id_facultad).strip()
