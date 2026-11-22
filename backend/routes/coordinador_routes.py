@@ -47,8 +47,7 @@ def crear_blueprint_coordinador(coordinador_service):
                 }
                 for fila in filas
                 if any(fila.values())
-            ],
-            "estudiantes": formulario.getlist("estudiantes")
+            ]
         }
 
 
@@ -58,13 +57,11 @@ def crear_blueprint_coordinador(coordinador_service):
         error = None
         formulario = {
             "filas": [fila_vacia() for _ in range(NUMERO_FILAS_SESION)],
-            "estudiantes": []
         }
         if request.method == "POST":
             filas = leer_filas(request.form)
             formulario = request.form.to_dict()
             formulario["filas"] = filas
-            formulario["estudiantes"] = request.form.getlist("estudiantes")
             try:
                 coordinador_service.generar_horario(
                     leer_datos(request.form, filas)
@@ -82,7 +79,6 @@ def crear_blueprint_coordinador(coordinador_service):
             periodos=coordinador_service.consultar_periodos(),
             aulas=coordinador_service.consultar_aulas(),
             docentes=coordinador_service.consultar_docentes(),
-            estudiantes=coordinador_service.consultar_estudiantes(),
             horarios=coordinador_service.consultar_horarios(),
             formulario=formulario,
             error=error
