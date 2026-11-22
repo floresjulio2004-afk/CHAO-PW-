@@ -10,13 +10,19 @@ class HorarioService:
 
 
     def clases_de_estudiante(self, id_estudiante):
+        estudiante = self.__usuario_repository.obtener_por_id(id_estudiante)
+        if not estudiante or not estudiante.get("id_paralelo"):
+            return []
         asignaturas = self.__nombres_de_asignaturas()
         aulas = {
             aula.id_aula: aula.nombre
             for aula in self.__aula_repository.obtener_todos()
         }
         clases = []
-        for horario in self.__horario_repository.obtener_por_estudiante(id_estudiante):
+        horarios = self.__horario_repository.obtener_por_paralelo(
+            estudiante["id_paralelo"]
+        )
+        for horario in horarios:
             nombre_docente = self.__nombre_usuario(
                 horario.id_docente,
                 "Docente no registrado"
@@ -53,7 +59,7 @@ class HorarioService:
         return franjas, grilla
 
 
-    def validar_conflictos(self, horario, ids_estudiantes=()):
+    def validar_conflictos(self, horario):
         asignaturas = self.__nombres_de_asignaturas()
         otros_horarios = [
             otro for otro in self.__horario_repository.obtener_todos()
@@ -66,6 +72,12 @@ class HorarioService:
                 for existente in otro.tiempos:
                     if not self.__se_superponen(nuevo, existente):
                         continue
+                    if otro.id_paralelo == horario.id_paralelo:
+                        raise ValueError(self.__mensaje(
+                            "El paralelo ya tiene clase",
+                            existente,
+                            materia
+                        ))
                     if otro.id_docente == horario.id_docente:
                         raise ValueError(self.__mensaje(
                             "El docente ya tiene clase",
@@ -78,26 +90,6 @@ class HorarioService:
                             existente,
                             materia
                         ))
-        for id_estudiante in ids_estudiantes:
-            for otro in self.__horario_repository.obtener_por_estudiante(id_estudiante):
-                if (
-                    otro.id_periodo != horario.id_periodo
-                    or otro.id_horario == horario.id_horario
-                ):
-                    continue
-                materia = asignaturas.get(otro.id_asignatura, otro.id_asignatura)
-                for nuevo in horario.tiempos:
-                    for existente in otro.tiempos:
-                        if self.__se_superponen(nuevo, existente):
-                            nombre = self.__nombre_usuario(
-                                id_estudiante,
-                                id_estudiante
-                            )
-                            raise ValueError(self.__mensaje(
-                                f"El estudiante {nombre} ya tiene clase",
-                                existente,
-                                materia
-                            ))
 
 
     def __nombres_de_asignaturas(self):
