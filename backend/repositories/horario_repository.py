@@ -13,19 +13,24 @@ class HorarioRepository(ABC):
 
 
     @abstractmethod
-    def obtener_por_estudiante(self, id_estudiante):
+    def obtener_por_paralelo(self, id_paralelo):
         pass
 
 
     @abstractmethod
-    def obtener_inscritos(self, id_horario):
+    def obtener_por_docente(self, id_docente):
         pass
 
 
     @abstractmethod
-    def guardar(self, horario, ids_estudiantes=()):
+    def guardar(self, horario):
         pass
 
+
+    @abstractmethod
+    def actualizar(self, horario):
+        pass
+    
 
     @abstractmethod
     def eliminar(self, id_horario):
