@@ -3,19 +3,23 @@ from factories.creador_usuario import CreadorUsuario
 
 
 class AdministradorService:
-    def __init__(self, usuario_repository, rol_repository, facultad_repository, carrera_repository, nivel_educativo_repository, configuracion_repository, sistema_service):
+    def __init__(self, usuario_repository, facultad_repository, carrera_repository, nivel_repository, paralelo_repository):
         self.__usuario_repository = usuario_repository
-        self.__rol_repository = rol_repository
         self.__facultad_repository = facultad_repository
         self.__carrera_repository = carrera_repository
-        self.__nivel_educativo_repository = nivel_educativo_repository
-        self.__configuracion_repository = configuracion_repository
-        self.__sistema_service = sistema_service
+        self.__nivel_repository = nivel_repository
+        self.__paralelo_repository = paralelo_repository
+        self.__referencias = {
+            "id_carrera": ("carrera", carrera_repository),
+            "id_nivel": ("nivel", nivel_repository),
+            "id_paralelo": ("paralelo", paralelo_repository)
+        }
 
-    # GESTIÓN DE USUARIOS
+
     def crear_usuario(self, usuario):
         if not isinstance(usuario, Usuario):
             raise TypeError("El usuario debe ser un objeto de tipo Usuario.")
+        self.__validar_referencias(usuario.datos_adicionales())
         return self.__usuario_repository.guardar(usuario)
 
         
@@ -36,6 +40,35 @@ class AdministradorService:
         return self.__usuario_repository.obtener_todos()
 
 
+    def consultar_usuarios_con_detalle(self):
+        facultades = {
+            facultad.id_facultad: facultad.nombre
+            for facultad in self.__facultad_repository.obtener_todos()
+        }
+        carreras = {
+            carrera.id_carrera: f"{carrera.nombre} ({facultades.get(carrera.id_facultad, 'Sin facultad')})"
+            for carrera in self.__carrera_repository.obtener_todos()
+        }
+        niveles = {
+            nivel.id_nivel: nivel.nombre
+            for nivel in self.__nivel_repository.obtener_todos()
+        }
+        paralelos = {
+            paralelo.id_paralelo: paralelo.nombre
+            for paralelo in self.__paralelo_repository.obtener_todos()
+        }
+        vistas = []
+        for usuario in self.__usuario_repository.obtener_todos():
+            vista = {
+                campo: valor
+                for campo, valor in usuario.items()
+                if campo != "contrasena_hash"
+            }
+            vista["detalle"] = self.__detalle(usuario, carreras, niveles, paralelos)
+            vistas.append(vista)
+        return vistas
+
+
     def modificar_usuario(self, id_usuario, datos):
         return self.__usuario_repository.actualizar(id_usuario, datos)
 
@@ -43,78 +76,35 @@ class AdministradorService:
     def eliminar_usuario(self, id_usuario):
         return self.__usuario_repository.eliminar(id_usuario)
 
-    # GESTIÓN DE ROLES
-    def crear_rol(self, rol):
-        pass
-
-
-    def consultar_roles(self):
-        pass
-
-
-    def modificar_rol(self, id_rol, datos):
-        pass
-
-
-    def eliminar_rol(self, id_rol):
-        pass
-
-    # GESTIÓN DE FACULTADES
-    def crear_facultad(self, facultad):
-        pass
-
 
     def consultar_facultades(self):
-        pass
-
-
-    def modificar_facultad(self, id_facultad, datos):
-        pass
-
-
-    def eliminar_facultad(self, id_facultad):
-        pass
-
-    # GESTIÓN DE CARRERAS
-    def crear_carrera(self, carrera):
-        pass
+        return self.__facultad_repository.obtener_todos()
 
 
     def consultar_carreras(self):
-        pass
+        return self.__carrera_repository.obtener_todos()
 
 
-    def modificar_carrera(self, id_carrera, datos):
-        pass
+    def consultar_niveles(self):
+        return self.__nivel_repository.obtener_todos()
+
+    
+    def consultar_paralelos(self):
+        return self.__paralelo_repository.obtener_todos()
 
 
-    def eliminar_carrera(self, id_carrera):
-        pass
+    def __validar_referencias(self, datos):
+        for campo, (nombre, repositorio) in self.__referencias.items():
+            if campo in datos and repositorio.obtener_por_id(datos[campo]) is None:
+                raise ValueError(f"La opción elegida para {nombre} no existe.")
 
-    # GESTIÓN DE NIVELES EDUCATIVOS
-    def crear_nivel_educativo(self, nivel):
-        pass
-
-
-    def consultar_niveles_educativos(self):
-        pass
-
-
-    def modificar_nivel_educativo(self, id_nivel, datos):
-        pass
-
-
-    def eliminar_nivel_educativo(self, id_nivel):
-        pass
-
-    # GESTIÓN DE CONFIGURACIÓN
-    def consultar_configuracion(self):
-        pass
-
-
-    def modificar_configuracion(self, datos):
-        pass
-
-    # INFORMACIÓN GENERAL DEL SISTEMA
-    def consultar_informacion_sistema(self):
-        pass
+    
+    @staticmethod
+    def __detalle(usuario, carreras, niveles, paralelos):
+        if usuario.get("rol") == "estudiante":
+            return " · ".join([
+                carreras.get(usuario.get("id_carrera"), "Sin carrera"),
+                niveles.get(usuario.get("id_nivel"), "Sin nivel"),
+                f"Paralelo {paralelos.get(usuario.get('id_paralelo'), '—')}"
+            ])
+        return usuario.get("especialidad", "—")
