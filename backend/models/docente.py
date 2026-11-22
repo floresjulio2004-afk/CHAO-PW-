@@ -19,6 +19,10 @@ class Docente(Usuario):
         self.__especialidad = especialidad.strip()
 
 
+    def datos_adicionales(self):
+        return {"especialidad": self.especialidad}
+
+
     def personalizar_interfaz(self, tema):
         self.tema = tema
         return self.tema
