@@ -3,7 +3,7 @@ from routes.seguridad import rol_requerido
 
 
 LONGITUD_MINIMA_CONTRASENA = 8
-CAMPOS_ADICIONALES = ("nivel", "especialidad")
+CAMPOS_ADICIONALES = ("id_carrera", "id_nivel", "id_paralelo", "especialidad")
 
 
 def crear_blueprint_administrador(administrador_service, registro_fabricas, gestor_contrasenas):
@@ -15,16 +15,8 @@ def crear_blueprint_administrador(administrador_service, registro_fabricas, gest
 
 
     def listar_usuarios():
-        usuarios = [
-            {
-                campo: valor
-                for campo, valor in usuario.items()
-                if campo != "contrasena_hash"
-            }
-            for usuario in administrador_service.consultar_usuarios()
-        ]
         return sorted(
-            usuarios,
+            administrador_service.consultar_usuarios_con_detalle(),
             key=lambda u: (str(u.get("rol", "")), str(u.get("nombre", "")).lower())
         )
 
@@ -72,6 +64,9 @@ def crear_blueprint_administrador(administrador_service, registro_fabricas, gest
             nombre=session["nombre"],
             usuarios=listar_usuarios(),
             roles=registro_fabricas.roles(),
+            carreras=administrador_service.consultar_carreras(),
+            niveles=administrador_service.consultar_niveles(),
+            paralelos=administrador_service.consultar_paralelos(),
             formulario=formulario,
             error=error
         )
