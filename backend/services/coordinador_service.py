@@ -1,3 +1,6 @@
+from collections import Counter
+
+
 class CoordinadorService:
     def __init__(self, horario_repository, aula_repository, asignatura_repository, usuario_repository, paralelo_repository, periodo_repository, horario_service, fabrica_constructor):
         self.__horario_repository = horario_repository
@@ -9,12 +12,11 @@ class CoordinadorService:
         self.__horario_service = horario_service
         self.__fabrica_constructor = fabrica_constructor
 
-    # GESTIÓN DE HORARIOS
-    def crear_horario(self, horario, ids_estudiantes=()):
-        ids_estudiantes = list(dict.fromkeys(ids_estudiantes))
-        self.__validar_referencias(horario, ids_estudiantes)
-        self.__horario_service.validar_conflictos(horario, ids_estudiantes)
-        return self.__horario_repository.guardar(horario, ids_estudiantes)
+
+    def crear_horario(self, horario):
+        self.__validar_referencias(horario)
+        self.__horario_service.validar_conflictos(horario)
+        return self.__horario_repository.guardar(horario)
 
 
     def consultar_horarios(self):
@@ -30,15 +32,25 @@ class CoordinadorService:
             periodo.id_periodo: periodo.nombre
             for periodo in self.__periodo_repository.obtener_todos()
         }
+        usuarios = self.__usuario_repository.obtener_todos()
+        docentes = {
+            usuario["id_usuario"]: usuario["nombre"]
+            for usuario in usuarios
+            if usuario.get("rol") == "docente"
+        }
+        estudiantes_por_paralelo = Counter(
+            usuario.get("id_paralelo")
+            for usuario in usuarios
+            if usuario.get("rol") == "estudiante"
+        )
         vistas = []
         for horario in self.__horario_repository.obtener_todos():
-            docente = self.__usuario_repository.obtener_por_id(horario.id_docente)
             vistas.append({
                 "id_horario": horario.id_horario,
                 "asignatura": asignaturas.get(horario.id_asignatura, horario.id_asignatura),
                 "paralelo": paralelos.get(horario.id_paralelo, horario.id_paralelo),
                 "periodo": periodos.get(horario.id_periodo, horario.id_periodo),
-                "docente": docente["nombre"] if docente else "Docente no registrado",
+                "docente": docentes.get(horario.id_docente, "Docente no registrado"),
                 "sesiones": [
                     {
                         "dia": tiempo.dia,
@@ -48,9 +60,7 @@ class CoordinadorService:
                     }
                     for tiempo in horario.tiempos
                 ],
-                "inscritos": len(
-                    self.__horario_repository.obtener_inscritos(horario.id_horario)
-                ),
+                "estudiantes": estudiantes_por_paralelo.get(horario.id_paralelo, 0),
                 "observacion": horario.observacion
             })
         return sorted(
@@ -59,83 +69,10 @@ class CoordinadorService:
         )
 
 
-    def modificar_horario(self, id_horario, datos):
-        pass
-
-
     def eliminar_horario(self, id_horario):
         return self.__horario_repository.eliminar(id_horario)
 
-    # GESTIÓN DE AULAS
-    def crear_aula(self, aula):
-        pass
-
-    def consultar_aulas(self):
-        return self.__aula_repository.obtener_todos()
-
-    def modificar_aula(self, id_aula, datos):
-        pass
-
-    def eliminar_aula(self, id_aula):
-        pass
-
-    # GESTIÓN DE ASIGNATURAS
-    def crear_asignatura(self, asignatura):
-        pass
-
-    def consultar_asignaturas(self):
-        return self.__asignatura_repository.obtener_todos()
-
-    def modificar_asignatura(self, id_asignatura, datos):
-        pass
-
-    def eliminar_asignatura(self, id_asignatura):
-        pass
-
-    # GESTIÓN DE DOCENTES
-    def crear_docente(self, docente):
-        pass
-
-    def consultar_docentes(self):
-        return self.__usuarios_por_rol("docente")
-
-    def modificar_docente(self, id_docente, datos):
-        pass
-
-    def eliminar_docente(self, id_docente):
-        pass
-
-    # CONSULTA DE ESTUDIANTES (para inscribirlos en un horario)
-    def consultar_estudiantes(self):
-        return self.__usuarios_por_rol("estudiante")
-
-    # GESTIÓN DE PARALELOS
-    def crear_paralelo(self, paralelo):
-        pass
-
-    def consultar_paralelos(self):
-        return self.__paralelo_repository.obtener_todos()
-
-    def modificar_paralelo(self, id_paralelo, datos):
-        pass
-
-    def eliminar_paralelo(self, id_paralelo):
-        pass
-
-    # GESTIÓN DE PERIODOS ACADÉMICOS
-    def crear_periodo(self, periodo):
-        pass
-
-    def consultar_periodos(self):
-        return self.__periodo_repository.obtener_todos()
-
-    def modificar_periodo(self, id_periodo, datos):
-        pass
-
-    def eliminar_periodo(self, id_periodo):
-        pass
-
-    # GENERACIÓN DE HORARIOS
+    
     def generar_horario(self, datos):
         constructor = (
             self.__fabrica_constructor()
@@ -152,24 +89,39 @@ class CoordinadorService:
                 tiempo.get("hora_fin"),
                 tiempo.get("id_aula")
             )
-        horario = constructor.construir()
-        return self.crear_horario(horario, datos.get("estudiantes", []))
+        return self.crear_horario(constructor.construir())
 
-    # MÉTODOS PRIVADOS
-    def __usuarios_por_rol(self, rol):
-        usuarios = [
+
+    def consultar_aulas(self):
+        return self.__aula_repository.obtener_todos()
+
+
+    def consultar_asignaturas(self):
+        return self.__asignatura_repository.obtener_todos()
+
+
+    def consultar_paralelos(self):
+        return self.__paralelo_repository.obtener_todos()
+
+    
+    def consultar_periodos(self):
+        return self.__periodo_repository.obtener_todos()
+
+
+    def consultar_docentes(self):
+        docentes = [
             {
                 "id_usuario": usuario["id_usuario"],
                 "nombre": usuario["nombre"],
                 "cedula": usuario["cedula"]
             }
             for usuario in self.__usuario_repository.obtener_todos()
-            if usuario.get("rol") == rol
+            if usuario.get("rol") == "docente"
         ]
-        return sorted(usuarios, key=lambda usuario: usuario["nombre"].lower())
+        return sorted(docentes, key=lambda docente: docente["nombre"].lower())
 
 
-    def __validar_referencias(self, horario, ids_estudiantes):
+    def __validar_referencias(self, horario):
         if self.__asignatura_repository.obtener_por_id(horario.id_asignatura) is None:
             raise ValueError("La asignatura seleccionada no existe.")
         if self.__paralelo_repository.obtener_por_id(horario.id_paralelo) is None:
@@ -182,7 +134,3 @@ class CoordinadorService:
         for tiempo in horario.tiempos:
             if self.__aula_repository.obtener_por_id(tiempo.id_aula) is None:
                 raise ValueError(f"El aula {tiempo.id_aula} no existe.")
-        for id_estudiante in ids_estudiantes:
-            estudiante = self.__usuario_repository.obtener_por_id(id_estudiante)
-            if not estudiante or estudiante.get("rol") != "estudiante":
-                raise ValueError("Uno de los estudiantes seleccionados no es válido.")
