@@ -1,7 +1,7 @@
-import json
 from pathlib import Path
 from models.horario import Horario
 from models.tiempo_horario import TiempoHorario
+from repositories.almacen_json import AlmacenJson
 from repositories.horario_repository import HorarioRepository
 
 
@@ -13,29 +13,7 @@ class HorarioJsonRepository(HorarioRepository):
                 / "data"
                 / "horarios.json"
             )
-        self.__ruta_archivo = Path(ruta_archivo)
-
-
-    def __leer_archivo(self):
-        if not self.__ruta_archivo.exists():
-            return []
-        with open(self.__ruta_archivo, "r", encoding="utf-8") as archivo:
-            registros = json.load(archivo)
-        if not isinstance(registros, list):
-            raise ValueError(
-                "El archivo de horarios debe contener una lista."
-            )
-        return registros
-
-
-    def __guardar_archivo(self, registros):
-        with open(self.__ruta_archivo, "w", encoding="utf-8") as archivo:
-            json.dump(
-                registros,
-                archivo,
-                ensure_ascii=False,
-                indent=4
-            )
+        self.__almacen = AlmacenJson(ruta_archivo, list)
 
 
     @staticmethod
@@ -63,7 +41,7 @@ class HorarioJsonRepository(HorarioRepository):
 
 
     @staticmethod
-    def __a_registro(horario, ids_estudiantes):
+    def __a_registro(horario):
         return {
             "id_horario": horario.id_horario,
             "id_asignatura": horario.id_asignatura,
@@ -81,61 +59,73 @@ class HorarioJsonRepository(HorarioRepository):
                     "id_aula": tiempo.id_aula
                 }
                 for tiempo in horario.tiempos
-            ],
-            "estudiantes": list(ids_estudiantes)
+            ]
         }
 
 
     def obtener_todos(self):
         return [
             self.__a_horario(registro)
-            for registro in self.__leer_archivo()
+            for registro in self.__almacen.leer()
         ]
 
 
     def obtener_por_id(self, id_horario):
-        for registro in self.__leer_archivo():
+        for registro in self.__almacen.leer():
             if registro.get("id_horario") == id_horario:
                 return self.__a_horario(registro)
         return None
 
 
-    def obtener_por_estudiante(self, id_estudiante):
+    def obtener_por_paralelo(self, id_paralelo):
         return [
             self.__a_horario(registro)
-            for registro in self.__leer_archivo()
-            if id_estudiante in registro.get("estudiantes", [])
+            for registro in self.__almacen.leer()
+            if registro.get("id_paralelo") == id_paralelo
         ]
 
 
-    def obtener_inscritos(self, id_horario):
-        for registro in self.__leer_archivo():
-            if registro.get("id_horario") == id_horario:
-                return list(registro.get("estudiantes", []))
-        return []
+    def obtener_por_docente(self, id_docente):
+        return [
+            self.__a_horario(registro)
+            for registro in self.__almacen.leer()
+            if registro.get("id_docente") == id_docente
+        ]
 
 
-    def guardar(self, horario, ids_estudiantes=()):
+    def guardar(self, horario):
         if not isinstance(horario, Horario):
             raise TypeError("El horario debe ser un objeto Horario.")
-        registros = self.__leer_archivo()
+        registros = self.__almacen.leer()
         if any(
             registro.get("id_horario") == horario.id_horario
             for registro in registros
         ):
             raise ValueError("Ya existe un horario con ese ID.")
-        registros.append(self.__a_registro(horario, ids_estudiantes))
-        self.__guardar_archivo(registros)
+        registros.append(self.__a_registro(horario))
+        self.__almacen.guardar(registros)
         return horario
 
 
+    def actualizar(self, horario):
+        if not isinstance(horario, Horario):
+            raise TypeError("El horario debe ser un objeto Horario.")
+        registros = self.__almacen.leer()
+        for indice, registro in enumerate(registros):
+            if registro.get("id_horario") == horario.id_horario:
+                registros[indice] = self.__a_registro(horario)
+                self.__almacen.guardar(registros)
+                return horario
+        return None
+
+
     def eliminar(self, id_horario):
-        registros = self.__leer_archivo()
+        registros = self.__almacen.leer()
         restantes = [
             registro for registro in registros
             if registro.get("id_horario") != id_horario
         ]
         if len(restantes) == len(registros):
             return False
-        self.__guardar_archivo(restantes)
+        self.__almacen.guardar(restantes)
         return True
