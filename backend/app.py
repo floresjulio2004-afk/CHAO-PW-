@@ -6,6 +6,9 @@ from builders.constructor_horario import ConstructorHorario, DIAS_SEMANA
 from factories.registro_fabricas import RegistroFabricas
 from models.asignatura import Asignatura
 from models.aula import Aula
+from models.carrera import Carrera
+from models.facultad import Facultad
+from models.nivel_educativo import NivelEducativo
 from models.paralelo import Paralelo
 from models.periodo_academico import PeriodoAcademico
 from repositories.catalogo_json_repository import CatalogoJsonRepository
@@ -41,9 +44,17 @@ RUTA_CATALOGOS = Path(__file__).resolve().parent / "data" / "catalogos.json"
 ROLES_VALIDOS = {"estudiante", "docente", "coordinador", "administrador"}
 
 
-# Repositorios
 usuario_repository = UsuarioJsonRepository()
 horario_repository = HorarioJsonRepository()
+facultad_repository = CatalogoJsonRepository(
+    RUTA_CATALOGOS, "facultades", Facultad, "id_facultad"
+)
+carrera_repository = CatalogoJsonRepository(
+    RUTA_CATALOGOS, "carreras", Carrera, "id_carrera"
+)
+nivel_repository = CatalogoJsonRepository(
+    RUTA_CATALOGOS, "niveles", NivelEducativo, "id_nivel"
+)
 asignatura_repository = CatalogoJsonRepository(
     RUTA_CATALOGOS, "asignaturas", Asignatura, "id_asignatura"
 )
@@ -57,7 +68,7 @@ periodo_repository = CatalogoJsonRepository(
     RUTA_CATALOGOS, "periodos", PeriodoAcademico, "id_periodo"
 )
 
-# Servicios
+
 gestor_contrasenas = GestorContrasenas()
 registro_fabricas = RegistroFabricas.por_defecto()
 autenticacion = AutenticacionService(
@@ -70,15 +81,12 @@ horario_service = HorarioService(
     aula_repository,
     usuario_repository
 )
-# Los repositorios en None se conectarán cuando existan sus implementaciones.
 administrador_service = AdministradorService(
     usuario_repository=usuario_repository,
-    rol_repository=None,
-    facultad_repository=None,
-    carrera_repository=None,
-    nivel_educativo_repository=None,
-    configuracion_repository=None,
-    sistema_service=None
+    facultad_repository=facultad_repository,
+    carrera_repository=carrera_repository,
+    nivel_repository=nivel_repository,
+    paralelo_repository=paralelo_repository
 )
 coordinador_service = CoordinadorService(
     horario_repository=horario_repository,
