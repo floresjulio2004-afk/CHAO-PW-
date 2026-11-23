@@ -19,6 +19,7 @@
 
 <section class="panel">
     <h3>Crear horario</h3>
+    <p>Los estudiantes del paralelo elegido verán este horario automáticamente.</p>
 
     {% if not docentes %}
     <p class="aviso error">No hay docentes registrados. Un administrador debe crearlos primero en Gestión de usuarios.</p>
@@ -91,20 +92,6 @@
         </div>
         {% endfor %}
 
-        <h4>Estudiantes inscritos (opcional)</h4>
-        {% if estudiantes %}
-        <div class="lista-estudiantes">
-            {% for e in estudiantes %}
-            <label class="casilla">
-                <input type="checkbox" name="estudiantes" value="{{ e.id_usuario }}" {% if e.id_usuario in formulario['estudiantes'] %}checked{% endif %}>
-                {{ e.nombre }} ({{ e.cedula }})
-            </label>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p>No hay estudiantes registrados.</p>
-        {% endif %}
-
         <label for="observacion">Observación (opcional)</label>
         <input type="text" id="observacion" name="observacion" value="{{ formulario.get('observacion', '') }}">
 
@@ -125,7 +112,7 @@
                     <th>Periodo</th>
                     <th>Docente</th>
                     <th>Sesiones</th>
-                    <th>Inscritos</th>
+                    <th>Estudiantes</th>
                     <th></th>
                 </tr>
             </thead>
@@ -141,7 +128,7 @@
                         {{ s['dia'] }} {{ s['hora_inicio'] }}–{{ s['hora_fin'] }} · Aula {{ s['id_aula'] }}<br>
                         {% endfor %}
                     </td>
-                    <td>{{ h['inscritos'] }}</td>
+                    <td>{{ h['estudiantes'] }}</td>
                     <td>
                         <form method="post" action="{{ url_for('coord_horarios.eliminar', id_horario=h['id_horario']) }}" onsubmit="return confirm('¿Eliminar este horario?');">
                             <button type="submit" class="btn-eliminar">Eliminar</button>
