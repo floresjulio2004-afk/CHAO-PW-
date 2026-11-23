@@ -1,27 +1,41 @@
-class nivel_educativo:
-    tipo = "tercer nivel educativo"
+class NivelEducativo:
+    def __init__(self, id_nivel, nombre, descripcion):
+        self.id_nivel = id_nivel
+        self.nombre = nombre
+        self.descripcion = descripcion
 
-    def __init__(self, id_nivel, nombre, tipo):
-            self.id_nivel = id_nivel
-            self.nombre = nombre
-            self.tipo = tipo
 
-    def mostrar_datos(self):    
-            print(f"ID: {self.id_nivel}")
-            print(f"Nombre: {self.nombre}")
-            print(f"Tipo: {self.tipo}")
-        
-    def consultar_nivel(self):
-            pass    
-    @classmethod
-    def mostrar_tipo(cls):
-            print(f"Tipo de nivel educativo: {cls.tipo}")   
-    @staticmethod
-    def mostrar_mensaje():
-            print("Este es un nivel educativo") 
-        
-    nivel1 = nivel_educativo(1, "Ingenieria de Sistemas", "tercer nivel educativo")
-    nivel_educativo.mostrar_tipo()
-    nivel_educativo.mostrar_mensaje()
-    nivel1.mostrar_datos()
-    print(type(nivel1))
+    @property
+    def id_nivel(self):
+        return self.__id_nivel
+
+
+    @id_nivel.setter
+    def id_nivel(self, id_nivel):
+        if id_nivel is None or str(id_nivel).strip() == "":
+            raise ValueError("El ID del nivel educativo no puede quedar vacío.")
+        self.__id_nivel = id_nivel
+
+
+    @property
+    def nombre(self):
+        return self.__nombre
+
+
+    @nombre.setter
+    def nombre(self, nombre):
+        if not isinstance(nombre, str) or not nombre.strip():
+            raise ValueError("El nombre del nivel educativo no puede quedar vacío.")
+        self.__nombre = nombre.strip()
+
+
+    @property
+    def descripcion(self):
+        return self.__descripcion
+
+
+    @descripcion.setter
+    def descripcion(self, descripcion):
+        if not isinstance(descripcion, str) or not descripcion.strip():
+            raise ValueError("La descripción no puede quedar vacía.")
+        self.__descripcion = descripcion.strip()

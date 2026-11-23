@@ -1,34 +1,11 @@
-from usuario import Usuario
+from models.usuario import Usuario
 
 
 class Coordinador(Usuario):
-    def __init__(self, id_usuario, nombre, cedula, correo, contrasena):
-        super().__init__(id_usuario, nombre, cedula, correo, contrasena)
-
-    
-    def editar_perfil(self):
-        pass
+    def __init__(self, nombre, cedula, correo, contrasena_hash):
+        super().__init__(None, nombre, cedula, correo, contrasena_hash, "coordinador")
 
 
-    def gestionar_horario(self):
-        pass
-
-
-    def gestionar_aula(self):
-        pass
-
-
-    def gestionar_asignatura(self):
-        pass
-
-
-    def gestionar_docente(self):
-        pass
-
-
-    def gestionar_paralelo(self):
-        pass
-
-
-    def gestionar_periodo(self):
-        pass
+    def personalizar_interfaz(self, tema):
+        self.tema = tema
+        return self.tema

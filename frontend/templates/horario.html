@@ -26,10 +26,10 @@
                 <tr>
                     <th>{{ inicio }} - {{ fin }}</th>
                     {% for dia in dias %}
-                    {% set c = grilla.get((dia, inicio)) %}
+                    {% set c = grilla.get((dia, inicio, fin)) %}
                     <td>
                         {% if c %}
-                        <a class="clase color-{{ c['id'] % 5 }}" href="{{ url_for('estudiante_clase', id_clase=c['id']) }}">
+                        <a class="clase color-{{ c['color'] }}" href="{{ url_for('estudiante_clase', id_clase=c['id']) }}">
                             <strong>{{ c['asignatura'] }}</strong>
                             <span>Aula {{ c['codigo_aula'] }}</span>
                         </a>

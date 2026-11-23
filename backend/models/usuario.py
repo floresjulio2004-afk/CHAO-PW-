@@ -1,13 +1,20 @@
+import uuid
 from abc import ABC, abstractmethod
 
 
 class Usuario(ABC):
-    def __init__(self, id_usuario, nombre, cedula, correo, contrasena):
+    def __init__(self, id_usuario, nombre, cedula, correo, contrasena_hash, rol):
+        if id_usuario is None:
+            id_usuario = f"USR-{uuid.uuid4()}"
+        elif not isinstance(id_usuario, str) or not id_usuario.strip():
+            raise ValueError("El ID del usuario no es válido.")
         self.__id_usuario = id_usuario
-        self.__nombre = nombre
-        self.__cedula = cedula
-        self.__correo = correo
-        self.__contrasena = contrasena
+        self.nombre = nombre
+        self.cedula = cedula
+        self.correo = correo
+        self.__contrasena_hash = contrasena_hash
+        self.__rol = rol
+        self.tema = "claro"
 
 
     @property
@@ -22,14 +29,21 @@ class Usuario(ABC):
 
     @nombre.setter
     def nombre(self, nombre):
-        if nombre.strip() == "":
-            raise ValueError ("El nombre no puede quedar vacío")
-        self.__nombre = nombre
+        if not isinstance(nombre, str) or not nombre.strip():
+            raise ValueError("El nombre no puede quedar vacío.")
+        self.__nombre = nombre.strip()
 
 
     @property
     def cedula(self):
         return self.__cedula
+
+
+    @cedula.setter
+    def cedula(self, cedula):
+        if not isinstance(cedula, str) or not cedula.strip():
+            raise ValueError("La cédula no puede quedar vacía.")
+        self.__cedula = cedula.strip()
 
 
     @property
@@ -39,16 +53,43 @@ class Usuario(ABC):
 
     @correo.setter
     def correo(self, correo):
-        if "@" not in correo:
-            raise ValueError ("El correo debe contener @")
+        if not isinstance(correo, str):
+            raise ValueError("El correo debe ser un texto válido.")
+        correo = correo.strip().lower()
+        if not correo or "@" not in correo:
+            raise ValueError("El correo debe contener @.")
         self.__correo = correo
 
 
     @property
-    def contrasena(self):
-        return self.__contrasena
+    def contrasena_hash(self):
+        return self.__contrasena_hash
+
+
+    @property
+    def rol(self):
+        return self.__rol
+
+
+    @property
+    def tema(self):
+        return self.__tema
+
+
+    @tema.setter
+    def tema(self, tema):
+        if not isinstance(tema, str):
+            raise ValueError("El tema debe ser un texto válido.")
+        tema = tema.strip().lower()
+        if tema not in ("claro", "oscuro"):
+            raise ValueError("El tema debe ser claro u oscuro.")
+        self.__tema = tema
+
+
+    def datos_adicionales(self):
+        return {}
 
 
     @abstractmethod
-    def editar_perfil(self):
+    def personalizar_interfaz(self, tema):
         pass

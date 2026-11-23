@@ -9,7 +9,9 @@
 </section>
 
 <section>
-    <article><h3>Usuarios</h3><p>Administración de cuentas del sistema.</p></article>
-    <article><h3>Configuración</h3><p>Periodos académicos y ajustes generales.</p></article>
+    <a class="opcion" href="{{ url_for('admin_usuarios.gestionar') }}">
+        <h3>Gestión de usuarios</h3>
+        <p>Crea, consulta y elimina usuarios de cualquier rol.</p>
+    </a>
 </section>
 {% endblock %}

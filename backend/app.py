@@ -1,129 +1,103 @@
-import json
-import os
-from functools import wraps
+import os 
+from pathlib import path 
+from threading import RLock
+from dotenv import load_dotenv
+from flask import Flask 
+from flask_wtf.csrf import CSRFError, CSRFProtect 
 
-from flask import Flask, render_template, request, redirect, url_for, session, abort
+from builders.constructor_horario import ConstructorHorario
+from factories.registro_fabricas import RegistroFabricas
+from models.asignatura import Asignatura
+from models.aula import Aula
+from models.carrera import Carrera
+from models.facultad import Facultad
+from models.nivel_educativo import NivelEducativo
+from models.paralelo import Paralelo
+from models.periodo_academico import PeriodoAcademico
+from repositories.almacen_json import AlmacenJson
+from repositories.catalogo_json_repository import CatalogoJsonRepository
+from repositories.horario_json_repository import HorarioJsonRepository
+from repositories.usuario_json_repository import UsuarioJsonRepository
+from routes.administrador_routes import crear_blueprint_administrador
+from routes.coordinador_routes import crear_blueprint_coordinador
+from routes.horario_routes import crear_blueprint_horario
+from routes.sesion_routes import registrar_rutas_sesion
+from routes.sistema_routes import crear_blueprint_sistema
+from services.administrador_service import AdministradorService
+from services.autenticacion_service import AutenticacionService
+from services.coordinador_service import CoordinadorService
 from services.gestor_contrasenas import GestorContrasenas
+from services.horario_service import HorarioService
+from services.sistema_service import SistemaService
 
-app = Flask(
-    __name__,
-    template_folder="../frontend/templates",
-    static_folder="../frontend/static"
-)
-app.secret_key = os.getenv("SECRET_KEY", "clave-de-desarrollo")
+RUTA_BACKEND = Path(__file__).resolve().parent 
 
-RUTA_USUARIOS = os.path.join(os.path.dirname(__file__), "data", "usuarios.json")
-RUTA_HORARIOS = os.path.join(os.path.dirname(__file__), "data", "horarios.json")
+def create_app(config=None):
+    load_dotenv(RUTA_BACKEND.parent/".env")
+    app = Flask(__name__, template_folder="../frontend/templates",
+                static_folder="../frontend/static")
+    app.config.from_mapping(
+        SECRET_KEY=os.getenv("SECRET_KEY"),
+        SESSION_COOKIE_SAMESITE="Lax",
+        DATA_DIR=RUTA_BACKEND / "data",
+    )
+    app.config.update(config or {})
+    if not app.secret_key
+        raise RuntimeError("El valor Secret_Key está sin configurar")
+    CSRFProtect(app)
 
-DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+    @app.errorhandler(CSRFError)
+    def formulario_invalido(error):
+        return "El formulario no es válido o caducó. " \
+        "Vuelve a abrirlo e inténtalo de nuevo.", 400
 
+    datos=Path(app.config["DATA_DIR"])
+    block = RLock()
+    usuarios = UsuarioJsonRepository(datos/"usuarios.json", block=block)
+    horarios = HorarioJsonRepository(datos/"horarios.json")
 
-def buscar_usuario(correo):
-    with open(RUTA_USUARIOS, encoding="utf-8") as archivo:
-        usuarios = json.load(archivo)
-    for usuario in usuarios:
-        if usuario["correo"].lower() == correo.lower():
-            return usuario
-    return None
+    def catalogo(clave, clase, campo_id):
+        return CatalogoJsonRepository(datos/"catalogo.json", clave, clase, campo_id)
 
+        asignaturas = catalogo("asignaturas", Asignatura, "id_asignatura")
+    aulas = catalogo("aulas", Aula, "id_aula")
+    paralelos = catalogo("paralelos", Paralelo, "id_paralelo")
+    periodos = catalogo("periodos", PeriodoAcademico, "id_periodo")
+    facultades = catalogo("facultades", Facultad, "id_facultad")
+    carreras = catalogo("carreras", Carrera, "id_carrera")
+    niveles = catalogo("niveles", NivelEducativo, "id_nivel")
 
-def clases_de(cedula):
-    with open(RUTA_HORARIOS, encoding="utf-8") as archivo:
-        horarios = json.load(archivo)
-    return horarios.get(cedula, [])
+    contrasenas = GestorContrasenas()
+    fabricas = RegistroFabricas.por_defecto()
+    autenticacion = AutenticacionService(usuarios, contrasenas)
+    consulta = HorarioService(horarios, asignaturas, aulas, usuarios)
+    administrador = AdministradorService(
+        usuarios, facultades, carreras, niveles, paralelos, horarios, bloqueo=bloqueo
+    )
+    coordinador = CoordinadorService(
+        horarios, aulas, asignaturas, usuarios, paralelos, periodos, consulta, ConstructorHorario,
+        bloqueo=bloqueo
+    )
 
+    sistema = SistemaService(AlmacenJson(datos / "configuracion.json", dict), usuarios, horarios)
 
-def rol_requerido(rol):
-    def decorador(funcion):
-        @wraps(funcion)
-        def envoltura(*args, **kwargs):
-            if "rol" not in session:
-                return redirect(url_for("login"))
-            if session["rol"] != rol:
-                return redirect(url_for("perfil"))
-            return funcion(*args, **kwargs)
-        return envoltura
-    return decorador
+    @app.context_processor
+    def informacion_publica():
+        return {"configuracion_sistema": sistema.consultar_configuracion()}
 
-
-@app.route("/")
-def inicio():
-    return render_template("index.html")
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    error = None
-    if request.method == "POST":
-        correo = request.form["correo"].strip()
-        contrasena = request.form["contrasena"]
-        usuario = buscar_usuario(correo)
-
-        if usuario and GestorContrasenas.verificar_contrasena(contrasena, usuario["contrasena_hash"]):
-            session["nombre"] = usuario["nombre"]
-            session["cedula"] = usuario["cedula"]
-            session["rol"] = usuario["rol"]
-            return redirect(url_for("perfil"))
-
-        error = "Correo o contraseña incorrectos"
-    return render_template("login.html", error=error)
-
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("login"))
-
-
-@app.route("/perfil")
-def perfil():
-    if "rol" not in session:
-        return redirect(url_for("login"))
-    return redirect(url_for(session["rol"]))
-
-
-@app.route("/estudiante")
-@rol_requerido("estudiante")
-def estudiante():
-    return render_template("perfil_estudiante.html", nombre=session["nombre"])
-
-
-@app.route("/estudiante/horario")
-@rol_requerido("estudiante")
-def estudiante_horario():
-    clases = clases_de(session["cedula"])
-    franjas = sorted({(c["hora_inicio"], c["hora_fin"]) for c in clases})
-    grilla = {(c["dia"], c["hora_inicio"]): c for c in clases}
-    return render_template("horario.html", nombre=session["nombre"],
-                           dias=DIAS, franjas=franjas, grilla=grilla)
-
-
-@app.route("/estudiante/clase/<int:id_clase>")
-@rol_requerido("estudiante")
-def estudiante_clase(id_clase):
-    for clase in clases_de(session["cedula"]):
-        if clase["id"] == id_clase:
-            return render_template("clase.html", clase=clase)
-    abort(404)
-
-
-@app.route("/docente")
-@rol_requerido("docente")
-def docente():
-    return render_template("perfil_docente.html", nombre=session["nombre"])
-
-
-@app.route("/gestor")
-@rol_requerido("gestor")
-def gestor():
-    return render_template("perfil_gestor.html", nombre=session["nombre"])
-
-
-@app.route("/administrador")
-@rol_requerido("administrador")
-def administrador():
-    return render_template("perfil_administrador.html", nombre=session["nombre"])
+    roles = fabricas.roles()
+    registrar_rutas_sesion(app, autenticacion, roles, usuarios)
+    app.register_blueprint(crear_blueprint_sistema(sistema, roles))
+    app.register_blueprint(crear_blueprint_administrador(administrador, fabricas, contrasenas))
+    app.register_blueprint(crear_blueprint_coordinador(coordinador))
+    app.register_blueprint(crear_blueprint_horario(
+        "estudiante", "Mi horario estudiantil", consulta.clases_de_estudiante
+    ))
+    app.register_blueprint(crear_blueprint_horario(
+        "docente", "Mi horario docente", consulta.clases_de_docente
+    ))
+    return app
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    create_app().run(host="0.0.0.0", port=5000)

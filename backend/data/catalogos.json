@@ -1,0 +1,39 @@
+{
+    "facultades": [
+        {"id_facultad": "FAC-INF", "nombre": "Facultad de Ciencias Informáticas"}
+    ],
+    "carreras": [
+        {"id_carrera": "CAR-SOF", "nombre": "Ingeniería en Software", "codigo": "SOF", "id_facultad": "FAC-INF"},
+        {"id_carrera": "CAR-TI", "nombre": "Tecnologías de la Información", "codigo": "TI", "id_facultad": "FAC-INF"}
+    ],
+    "niveles": [
+        {"id_nivel": "NIV-1", "nombre": "Primer semestre", "descripcion": "Nivel 1"},
+        {"id_nivel": "NIV-2", "nombre": "Segundo semestre", "descripcion": "Nivel 2"},
+        {"id_nivel": "NIV-3", "nombre": "Tercer semestre", "descripcion": "Nivel 3"},
+        {"id_nivel": "NIV-4", "nombre": "Cuarto semestre", "descripcion": "Nivel 4"},
+        {"id_nivel": "NIV-5", "nombre": "Quinto semestre", "descripcion": "Nivel 5"},
+        {"id_nivel": "NIV-6", "nombre": "Sexto semestre", "descripcion": "Nivel 6"},
+        {"id_nivel": "NIV-7", "nombre": "Séptimo semestre", "descripcion": "Nivel 7"},
+        {"id_nivel": "NIV-8", "nombre": "Octavo semestre", "descripcion": "Nivel 8"},
+        {"id_nivel": "NIV-9", "nombre": "Noveno semestre", "descripcion": "Nivel 9"}
+    ],
+    "asignaturas": [
+        {"id_asignatura": "ASG-POO", "codigo": "POO", "nombre": "Programación Orientada a Objetos", "creditos": 4},
+        {"id_asignatura": "ASG-RED", "codigo": "RED", "nombre": "Redes de Computadoras", "creditos": 4},
+        {"id_asignatura": "ASG-BDD", "codigo": "BDD", "nombre": "Bases de Datos", "creditos": 4},
+        {"id_asignatura": "ASG-MOO", "codigo": "MOO", "nombre": "Modelado Orientado a Objetos", "creditos": 3}
+    ],
+    "aulas": [
+        {"id_aula": "102", "nombre": "Laboratorio de Software", "capacidad": 30, "tipo": "laboratorio"},
+        {"id_aula": "103", "nombre": "Laboratorio de Cómputo", "capacidad": 30, "tipo": "laboratorio"},
+        {"id_aula": "205", "nombre": "Aula de Clases", "capacidad": 40, "tipo": "aula"},
+        {"id_aula": "301", "nombre": "Aula de Diseño", "capacidad": 25, "tipo": "aula"}
+    ],
+    "paralelos": [
+        {"id_paralelo": "PAR-A", "nombre": "A", "descripcion": "Paralelo A"},
+        {"id_paralelo": "PAR-B", "nombre": "B", "descripcion": "Paralelo B"}
+    ],
+    "periodos": [
+        {"id_periodo": "PER-2026-2", "nombre": "2026-2", "fecha_inicio": "2026-10-05", "fecha_fin": "2027-02-19", "estado": "activo"}
+    ]
+}

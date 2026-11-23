@@ -1,12 +1,10 @@
-from usuario import Usuario
+from models.usuario import Usuario
 
 
 class Docente(Usuario):
-    def __init__(self, id_usuario, nombre, cedula, correo, contrasena, especialidad):
-        super().__init__(id_usuario, nombre, cedula, correo, contrasena)
-        if not isinstance(especialidad, str) or not especialidad.strip():
-            raise ValueError("La especialidad de un docente no puede quedar vacía")
-        self.__especialidad = especialidad
+    def __init__(self, nombre, cedula, correo, contrasena_hash, especialidad):
+        super().__init__(None, nombre, cedula, correo, contrasena_hash, "docente")
+        self.especialidad = especialidad
 
 
     @property
@@ -14,25 +12,17 @@ class Docente(Usuario):
         return self.__especialidad
 
 
-    def editar_perfil(self):
-        return True
+    @especialidad.setter
+    def especialidad(self, especialidad):
+        if not isinstance(especialidad, str) or not especialidad.strip():
+            raise ValueError("La especialidad del docente no puede quedar vacía.")
+        self.__especialidad = especialidad.strip()
 
 
-    def consultar_horario(self):
-        pass
+    def datos_adicionales(self):
+        return {"especialidad": self.especialidad}
 
 
-    def consultar_asignatura(self):
-        pass
-
-    
-    def consultar_aula(self):
-        pass
-
-
-    def consultar_disponibilidad(self):
-        pass
-
-
-    def reportar_incidencia(self):
-        pass
+    def personalizar_interfaz(self, tema):
+        self.tema = tema
+        return self.tema
