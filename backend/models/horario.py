@@ -1,106 +1,121 @@
-class Horario:
-    def __init__(self, id_horario, id_asignatura, id_paralelo, id_periodo, id_docente, tiempos, estado, observacion):
-        self.id_horario = id_horario
-        self.id_asignatura = id_asignatura
-        self.id_paralelo = id_paralelo
-        self.id_periodo = id_periodo
-        self.id_docente = id_docente
-        self.tiempos = tiempos
-        self.estado = estado
-        self.observacion = observacion
+import zlib
 
 
-    @property
-    def id_horario(self):
-        return self.__id_horario
+class HorarioService:
+    def __init__(self, horario_repository, asignatura_repository, aula_repository, usuario_repository):
+        self.__horario_repository = horario_repository
+        self.__asignatura_repository = asignatura_repository
+        self.__aula_repository = aula_repository
+        self.__usuario_repository = usuario_repository
 
 
-    @id_horario.setter
-    def id_horario(self, id_horario):
-        if id_horario is None or not str(id_horario).strip():
-            raise ValueError("El ID del horario no puede quedar vacío.")
-        self.__id_horario = str(id_horario).strip()
+    def clases_de_estudiante(self, id_estudiante):
+        estudiante = self.__usuario_repository.obtener_por_id(id_estudiante)
+        if not estudiante or not estudiante.get("id_paralelo"):
+            return []
+        asignaturas = self.__nombres_de_asignaturas()
+        aulas = {
+            aula.id_aula: aula.nombre
+            for aula in self.__aula_repository.obtener_todos()
+        }
+        clases = []
+        horarios = self.__horario_repository.obtener_por_paralelo(
+            estudiante["id_paralelo"]
+        )
+        for horario in horarios:
+            nombre_docente = self.__nombre_usuario(
+                horario.id_docente,
+                "Docente no registrado"
+            )
+            color = zlib.crc32(horario.id_horario.encode("utf-8")) % 5
+            for tiempo in horario.tiempos:
+                clases.append({
+                    "id": tiempo.id_tiempo,
+                    "dia": tiempo.dia,
+                    "hora_inicio": tiempo.hora_inicio,
+                    "hora_fin": tiempo.hora_fin,
+                    "asignatura": asignaturas.get(
+                        horario.id_asignatura,
+                        horario.id_asignatura
+                    ),
+                    "docente": nombre_docente,
+                    "salon": aulas.get(tiempo.id_aula, "Aula sin registrar"),
+                    "codigo_aula": tiempo.id_aula,
+                    "color": color
+                })
+        return clases
 
 
-    @property
-    def id_asignatura(self):
-        return self.__id_asignatura
+    @staticmethod
+    def armar_grilla(clases):
+        franjas = sorted({
+            (clase["hora_inicio"], clase["hora_fin"])
+            for clase in clases
+        })
+        grilla = {
+            (clase["dia"], clase["hora_inicio"], clase["hora_fin"]): clase
+            for clase in clases
+        }
+        return franjas, grilla
 
 
-    @id_asignatura.setter
-    def id_asignatura(self, id_asignatura):
-        if id_asignatura is None or not str(id_asignatura).strip():
-            raise ValueError("La asignatura no puede quedar vacía.")
-        self.__id_asignatura = str(id_asignatura).strip()
+    def validar_conflictos(self, horario):
+        asignaturas = self.__nombres_de_asignaturas()
+        otros_horarios = [
+            otro for otro in self.__horario_repository.obtener_todos()
+            if otro.id_periodo == horario.id_periodo
+            and otro.id_horario != horario.id_horario
+        ]
+        for otro in otros_horarios:
+            materia = asignaturas.get(otro.id_asignatura, otro.id_asignatura)
+            for nuevo in horario.tiempos:
+                for existente in otro.tiempos:
+                    if not self.__se_superponen(nuevo, existente):
+                        continue
+                    if otro.id_paralelo == horario.id_paralelo:
+                        raise ValueError(self.__mensaje(
+                            "El paralelo ya tiene clase",
+                            existente,
+                            materia
+                        ))
+                    if otro.id_docente == horario.id_docente:
+                        raise ValueError(self.__mensaje(
+                            "El docente ya tiene clase",
+                            existente,
+                            materia
+                        ))
+                    if existente.id_aula == nuevo.id_aula:
+                        raise ValueError(self.__mensaje(
+                            f"El aula {nuevo.id_aula} ya está ocupada",
+                            existente,
+                            materia
+                        ))
 
 
-    @property
-    def id_paralelo(self):
-        return self.__id_paralelo
+    def __nombres_de_asignaturas(self):
+        return {
+            asignatura.id_asignatura: asignatura.nombre
+            for asignatura in self.__asignatura_repository.obtener_todos()
+        }
 
 
-    @id_paralelo.setter
-    def id_paralelo(self, id_paralelo):
-        if id_paralelo is None or not str(id_paralelo).strip():
-            raise ValueError("El paralelo no puede quedar vacío.")
-        self.__id_paralelo = str(id_paralelo).strip()
+    def __nombre_usuario(self, id_usuario, por_defecto):
+        usuario = self.__usuario_repository.obtener_por_id(id_usuario)
+        return usuario["nombre"] if usuario else por_defecto
 
 
-    @property
-    def id_periodo(self):
-        return self.__id_periodo
+    @staticmethod
+    def __se_superponen(tiempo_a, tiempo_b):
+        return (
+            tiempo_a.dia == tiempo_b.dia
+            and tiempo_a.hora_inicio < tiempo_b.hora_fin
+            and tiempo_b.hora_inicio < tiempo_a.hora_fin
+        )
 
 
-    @id_periodo.setter
-    def id_periodo(self, id_periodo):
-        if id_periodo is None or not str(id_periodo).strip():
-            raise ValueError("El periodo académico no puede quedar vacío.")
-        self.__id_periodo = str(id_periodo).strip()
-
-
-    @property
-    def id_docente(self):
-        return self.__id_docente
-
-
-    @id_docente.setter
-    def id_docente(self, id_docente):
-        if id_docente is None or not str(id_docente).strip():
-            raise ValueError("El docente no puede quedar vacío.")
-        self.__id_docente = str(id_docente).strip()
-
-
-    @property
-    def tiempos(self):
-        return self.__tiempos
-
-
-    @tiempos.setter
-    def tiempos(self, tiempos):
-        if not isinstance(tiempos, list) or not tiempos:
-            raise ValueError("El horario debe contener al menos una sesión.")
-        self.__tiempos = tiempos
-
-
-    @property
-    def estado(self):
-        return self.__estado
-
-
-    @estado.setter
-    def estado(self, estado):
-        if not isinstance(estado, str) or not estado.strip():
-            raise ValueError("El estado no puede quedar vacío.")
-        self.__estado = estado.strip().lower()
-
-
-    @property
-    def observacion(self):
-        return self.__observacion
-
-
-    @observacion.setter
-    def observacion(self, observacion):
-        if observacion is not None and not isinstance(observacion, str):
-            raise ValueError("La observación debe ser un texto válido.")
-        self.__observacion = observacion.strip() if observacion else ""
+    @staticmethod
+    def __mensaje(prefijo, tiempo, materia):
+        return (
+            f"{prefijo} el {tiempo.dia} de "
+            f"{tiempo.hora_inicio} a {tiempo.hora_fin} ({materia})."
+        )
