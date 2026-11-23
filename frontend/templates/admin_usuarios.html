@@ -43,9 +43,30 @@
         <label for="contrasena">Contraseña (mínimo 8 caracteres)</label>
         <input type="password" id="contrasena" name="contrasena" minlength="8" autocomplete="new-password" required>
 
-        <div id="campo-nivel">
-            <label for="nivel">Nivel del estudiante</label>
-            <input type="text" id="nivel" name="nivel" placeholder="Ej: 3er semestre" value="{{ formulario.get('nivel', '') }}">
+        <div id="campo-estudiante">
+            <label for="id_carrera">Carrera</label>
+            <select id="id_carrera" name="id_carrera">
+                <option value="">Elige una carrera</option>
+                {% for c in carreras %}
+                <option value="{{ c.id_carrera }}" {% if formulario.get('id_carrera') == c.id_carrera %}selected{% endif %}>{{ c.nombre }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="id_nivel">Nivel</label>
+            <select id="id_nivel" name="id_nivel">
+                <option value="">Elige un nivel</option>
+                {% for n in niveles %}
+                <option value="{{ n.id_nivel }}" {% if formulario.get('id_nivel') == n.id_nivel %}selected{% endif %}>{{ n.nombre }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="id_paralelo">Paralelo</label>
+            <select id="id_paralelo" name="id_paralelo">
+                <option value="">Elige un paralelo</option>
+                {% for p in paralelos %}
+                <option value="{{ p.id_paralelo }}" {% if formulario.get('id_paralelo') == p.id_paralelo %}selected{% endif %}>Paralelo {{ p.nombre }}</option>
+                {% endfor %}
+            </select>
         </div>
 
         <div id="campo-especialidad">
@@ -79,7 +100,7 @@
                     <td>{{ u.cedula }}</td>
                     <td>{{ u.correo }}</td>
                     <td><span class="rol rol-{{ u.rol }}">{{ u.rol|capitalize }}</span></td>
-                    <td>{{ u.nivel or u.especialidad or "—" }}</td>
+                    <td>{{ u.detalle }}</td>
                     <td>
                         <form method="post" action="{{ url_for('admin_usuarios.eliminar', id_usuario=u.id_usuario) }}" onsubmit="return confirm('¿Eliminar este usuario?');">
                             <button type="submit" class="btn-eliminar">Eliminar</button>
@@ -97,7 +118,7 @@
 
     function actualizarCampos() {
         const rol = selectorRol.value;
-        document.getElementById("campo-nivel").hidden = rol !== "estudiante";
+        document.getElementById("campo-estudiante").hidden = rol !== "estudiante";
         document.getElementById("campo-especialidad").hidden = rol !== "docente";
     }
 
