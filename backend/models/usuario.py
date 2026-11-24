@@ -3,6 +3,8 @@ import re
 from abc import ABC, abstractmethod
 
 class Usuario(ABC):
+    TEMAS= ("claro","oscuro")
+
     def __init__(self, id_usuario, nombre, cedula, correo, contrasena_hash, rol):
         if id_usuario is None:
             id_usuario = f"USR-{uuid.uuid4()}"
@@ -76,30 +78,27 @@ class Usuario(ABC):
     def contrasena_hash(self):
         return self.__contrasena_hash
 
-
     @property
     def rol(self):
         return self.__rol
-
 
     @property
     def tema(self):
         return self.__tema
 
-
     @tema.setter
     def tema(self, tema):
-        if not isinstance(tema, str):
-            raise ValueError("El tema debe ser un texto válido.")
-        tema = tema.strip().lower()
-        if tema not in ("claro", "oscuro"):
-            raise ValueError("El tema debe ser claro u oscuro.")
-        self.__tema = tema
+        self.__tema= self.estructurar_tema(tema)
 
+    @classmethod
+    def estructurar_tema(cls, tema):
+        tema=tema.strip().lower()if isinstance(tema, str)else ""
+        if tema not in cls.TEMAS:
+            raise ValueError ("El tema debe ser CLARO o OSCURO")
+        return tema
 
     def datos_adicionales(self):
         return {}
-
 
     @abstractmethod
     def personalizar_interfaz(self, tema):
