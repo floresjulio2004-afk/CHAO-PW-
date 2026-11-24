@@ -1,6 +1,6 @@
 import uuid
+import re
 from abc import ABC, abstractmethod
-
 
 class Usuario(ABC):
     def __init__(self, id_usuario, nombre, cedula, correo, contrasena_hash, rol):
@@ -16,36 +16,46 @@ class Usuario(ABC):
         self.__rol = rol
         self.tema = "claro"
 
-
     @property
     def id_usuario(self):
         return self.__id_usuario
-
 
     @property
     def nombre(self):
         return self.__nombre
 
-
     @nombre.setter
     def nombre(self, nombre):
-        if not isinstance(nombre, str) or not nombre.strip():
-            raise ValueError("El nombre no puede quedar vacío.")
-        self.__nombre = nombre.strip()
+        self.__nombre=self.estructurar_nombre(nombre)
 
+    @staticmethod
+    def estructurar_nombre(nombre):
+        if not isinstance(nombre,str)or not nombre.strip():
+            raise ValueError("El campo NOMBRE no puede quedar vacío. Tiene que llenarlo.")
+        return nombre.strip()
 
     @property
     def cedula(self):
         return self.__cedula
 
-
     @cedula.setter
     def cedula(self, cedula):
-        if not isinstance(cedula, str) or not cedula.strip():
-            raise ValueError("La cédula no puede quedar vacía.")
-        self.__cedula = cedula.strip()
+        self.__cedula=self.validar_cedula(cedula)
 
-
+    @staticmethod
+    def validar_cedula(cedula):
+        cedula=cedula.strip()if isinstance(cedula,str)else ""
+        if not re.fullmatch (r"[0-9]{10}",cedula):
+            raise ValueError("El campo CEDULA tiene que tener 10 caracteres numericos.")
+        codigo=int(cedula[:2])
+        if codigo not in range (1,25)and codigo != 30:
+            raise ValueError("El codigo inicial de la cedula no es valida. Ingrese un codigo válido")
+        productos=[int(digito)*(2-indice%2)for indice, digito in enumerate(cedula[:9])]
+        suma=sum(producto -9 if producto > 9 else producto for producto in productos)
+        if int (cedula[-1]!=(suma)%10):
+            raise ValueError("El digito verificador de la cedula no es valida. Ingrese un codigo válido")
+        return cedula
+        
     @property
     def correo(self):
         return self.__correo
@@ -53,13 +63,14 @@ class Usuario(ABC):
 
     @correo.setter
     def correo(self, correo):
-        if not isinstance(correo, str):
-            raise ValueError("El correo debe ser un texto válido.")
-        correo = correo.strip().lower()
-        if not correo or "@" not in correo:
-            raise ValueError("El correo debe contener @.")
-        self.__correo = correo
+        self.__correo=self.estructurar_correo
 
+    @staticmethod
+    def estructurar_correo(correo):
+        correo=correo.strip().lower()if isinstance(correo,str)else ""
+        if not re.fullmatch(r"[^@\s]+@[^@\s]+", correo):
+            raise ValueError ("Los caracteres no coinciden, el correo no es válido. " \
+            "Ingrese un correo válido.")
 
     @property
     def contrasena_hash(self):
